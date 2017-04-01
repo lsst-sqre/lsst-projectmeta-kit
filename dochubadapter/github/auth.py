@@ -6,8 +6,61 @@ https://developer.github.com/early-access/integrations/authentication/
 import datetime
 
 import jwt
+import requests
 
-__all__ = ['create_jwt']
+__all__ = ['create_jwt', 'get_installation_token']
+
+
+def get_installation_token(installation_id, integration_jwt):
+    """Create a GitHub token for an integration installation.
+
+    Parameters
+    ----------
+    installation_id : `int`
+        Installation ID. This is available in the URL of the integration's
+        **installation** ID.
+    integration_jwt : `bytes`
+        The integration's JSON Web Token (JWT). This is created by
+        `create_jwt`.
+
+    Returns
+    -------
+    token_obj : `dict`
+        GitHub token object. Includes the fields:
+
+        - ``token``: the token string itself.
+        - ``expires_at``: date time string when the token expires.
+        - ``on_behalf_of``: user that has authenticated.
+
+    Example
+    -------
+    The typical workflow for authenticating to an integration installation is:
+
+    .. code-block:: python
+
+       from dochubadapter.github import auth
+       jwt = auth.create_jwt(integration_id, private_key_path)
+       token_obj = auth.get_installation_token(installation_id, jwt)
+       print(token_obj['token'])
+    """
+    # https://developer.github.com/early-access/integrations/authentication/#as-an-installation
+    # curl -i -X POST \
+    #     -H "Authorization: Bearer $JWT" \
+    #     -H "Accept: application/vnd.github.machine-man-preview+json" \
+    #     https://api.github.com/installations/:installation_id/access_tokens
+
+    url = ('https://api.github.com/installations/'
+           '{installation_id:d}/access_tokens'.format(
+               installation_id=installation_id))
+
+    headers = {
+        'Authorization': 'Bearer {0}'.format(integration_jwt.decode('utf-8')),
+        'Accept': 'application/vnd.github.machine-man-preview+json'
+    }
+
+    resp = requests.post(url, headers=headers)
+    resp.raise_for_status()
+    return resp.json()
 
 
 def create_jwt(integration_id, private_key_path):

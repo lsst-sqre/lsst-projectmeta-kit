@@ -40,7 +40,8 @@ setup(
     keywords='lsst',
     packages=find_packages(exclude=['docs', 'tests*', 'data']),
     install_requires=[
-        'pyjwt>=1.4.2'
+        'pyjwt>=1.4.2',
+        'requests>=2.13.0'
     ],
     # package_data={},
     # entry_points={}
