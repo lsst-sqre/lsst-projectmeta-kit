@@ -20,7 +20,7 @@ def get_installation_token(installation_id, integration_jwt):
         Installation ID. This is available in the URL of the integration's
         **installation** ID.
     integration_jwt : `bytes`
-        The integration's JSON Web Token (JWT). This is created by
+        The integration's JSON Web Token (JWT). You can create this with
         `create_jwt`.
 
     Returns
@@ -30,7 +30,6 @@ def get_installation_token(installation_id, integration_jwt):
 
         - ``token``: the token string itself.
         - ``expires_at``: date time string when the token expires.
-        - ``on_behalf_of``: user that has authenticated.
 
     Example
     -------
@@ -42,16 +41,17 @@ def get_installation_token(installation_id, integration_jwt):
        jwt = auth.create_jwt(integration_id, private_key_path)
        token_obj = auth.get_installation_token(installation_id, jwt)
        print(token_obj['token'])
-    """
-    # https://developer.github.com/early-access/integrations/authentication/#as-an-installation
-    # curl -i -X POST \
-    #     -H "Authorization: Bearer $JWT" \
-    #     -H "Accept: application/vnd.github.machine-man-preview+json" \
-    #     https://api.github.com/installations/:installation_id/access_tokens
 
-    url = ('https://api.github.com/installations/'
-           '{installation_id:d}/access_tokens'.format(
-               installation_id=installation_id))
+    Notes
+    -----
+    See
+    https://developer.github.com/early-access/integrations/authentication/#as-an-installation
+    for more information
+    """
+    api_root = 'https://api.github.com'
+    url = '{root}/installations/{id_:d}/access_tokens'.format(
+        api_root=api_root,
+        id_=installation_id)
 
     headers = {
         'Authorization': 'Bearer {0}'.format(integration_jwt.decode('utf-8')),
@@ -64,7 +64,7 @@ def get_installation_token(installation_id, integration_jwt):
 
 
 def create_jwt(integration_id, private_key_path):
-    """Create a JSON Web Token for authenticate a GitHub Integration or
+    """Create a JSON Web Token to authenticate a GitHub Integration or
     installation.
 
     Parameters
@@ -82,7 +82,16 @@ def create_jwt(integration_id, private_key_path):
 
     Notes
     -----
-    https://developer.github.com/early-access/integrations/authentication/
+    The JWT is encoded with the RS256 algorithm. It includes a payload with
+    fields:
+
+    - ``'iat'``: The current time, as an `int` timestamp.
+    - ``'exp'``: Expiration time, as an `int timestamp. The expiration
+      time is set of 9 minutes in the future (maximum allowance is 10 minutes).
+    - ``'iss'``: The integration ID (`int`).
+
+    For more information, see
+    https://developer.github.com/early-access/integrations/authentication/.
     """
     integration_id = int(integration_id)
 
