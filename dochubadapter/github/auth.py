@@ -96,11 +96,10 @@ def create_jwt(integration_id, private_key_path):
     integration_id = int(integration_id)
 
     with open(private_key_path, 'rb') as f:
-        cert_str = f.read()
+        cert_bytes = f.read()
 
-    time_delta = datetime.timedelta(minutes=9)
     now = datetime.datetime.now()
-    expiration_time = datetime.datetime.now() + time_delta
+    expiration_time = now + datetime.timedelta(minutes=9)
     payload = {
         # Issued at time
         'iat': int(now.timestamp()),
@@ -110,4 +109,4 @@ def create_jwt(integration_id, private_key_path):
         'iss': integration_id
     }
 
-    return jwt.encode(payload, cert_str, algorithm='RS256')
+    return jwt.encode(payload, cert_bytes, algorithm='RS256')
