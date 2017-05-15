@@ -3,12 +3,12 @@ import os
 from io import open
 
 
-packagename = 'dochub-adapter'
-description = 'LSST DocHub metadata gathering and JSON-LD export library.'
-author = 'LSST SQuaRE'
+packagename = 'metaget'
+description = 'LSST project metadata gathering and JSON-LD export library.'
+author = 'Association of Universities for Research in Astronomy, Inc.'
 author_email = 'jsick@lsst.org'
 license = 'MIT'
-url = 'https://github.com/lsst-sqre/dochub-adapter'
+url = 'https://github.com/lsst-sqre/metaget'
 version = '0.0.1'
 
 
