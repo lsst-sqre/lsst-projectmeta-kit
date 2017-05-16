@@ -15,6 +15,11 @@ AUTHOR_PATTERN = re.compile(
     r"\\author"
 )
 
+# Abstract regular expression
+ABSTRACT_PATTERN = re.compile(
+    r"\\setDocAbstract"
+)
+
 
 class LsstDoc(object):
     """lsstdoc LaTeX document source.
@@ -31,6 +36,7 @@ class LsstDoc(object):
 
         self._parse_title()
         self._parse_author()
+        self._parse_abstract()
 
     @property
     def title(self):
@@ -55,6 +61,14 @@ class LsstDoc(object):
             return self._authors
         else:
             return []
+
+    @property
+    def abstract(self):
+        """Abstract (`str`)."""
+        if hasattr(self, '_abstract'):
+            return self._abstract
+        else:
+            return None
 
     def _parse_title(self):
         """Parse the title from TeX source."""
@@ -101,6 +115,15 @@ class LsstDoc(object):
                 else:
                     authors.append(part)
             self._authors = authors
+
+    def _parse_abstract(self):
+        match = ABSTRACT_PATTERN.search(self._tex)
+        if match:
+            start = match.end(0)
+            content = self._extract_in_brackets(start)
+            content = content.strip()
+            # TODO probably want to unwrap paragraphs.
+            self._abstract = content
 
     def _extract_in_brackets(self, start, opening='{', closing='}'):
         """Extract text found inside delimiters

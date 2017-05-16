@@ -31,3 +31,12 @@ def test_authors(ldm_nnn_data):
     expected = ['A. Author', 'B. Author', 'C. Author']
     lsstdoc = LsstDoc(ldm_nnn_data)
     assert lsstdoc.authors == expected
+
+
+def test_sample_abstract(ldm_nnn_data):
+    expected = ("%\nThis document demonstrates how to use the LSST \\LaTeX\\ "
+                "class files to make Data Management\ndocuments. Build this "
+                "document in the normal way, making sure that the class "
+                "file is\navailable in the \\LaTeX\\ load path.")
+    lsstdoc = LsstDoc(ldm_nnn_data)
+    assert lsstdoc.abstract == expected
