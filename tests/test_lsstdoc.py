@@ -40,3 +40,10 @@ def test_sample_abstract(ldm_nnn_data):
                 "file is\navailable in the \\LaTeX\\ load path.")
     lsstdoc = LsstDoc(ldm_nnn_data)
     assert lsstdoc.abstract == expected
+
+
+def test_sample_handle(ldm_nnn_data):
+    lsstdoc = LsstDoc(ldm_nnn_data)
+    assert lsstdoc.handle == 'LDM-nnn'
+    assert lsstdoc.series == 'LDM'
+    assert lsstdoc.serial == 'nnn'

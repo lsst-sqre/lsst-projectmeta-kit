@@ -20,6 +20,11 @@ ABSTRACT_PATTERN = re.compile(
     r"\\setDocAbstract"
 )
 
+# Document reference (handle) regular expression
+DOCREF_PATTERN = re.compile(
+    r"\\setDocRef{(?P<handle>.*?)}"
+)
+
 
 class LsstDoc(object):
     """lsstdoc LaTeX document source.
@@ -37,6 +42,7 @@ class LsstDoc(object):
         self._parse_title()
         self._parse_author()
         self._parse_abstract()
+        self._parse_doc_ref()
 
     @property
     def title(self):
@@ -70,12 +76,43 @@ class LsstDoc(object):
         else:
             return None
 
+    @property
+    def handle(self):
+        """Document handle (`str`)."""
+        if hasattr(self, '_handle'):
+            return self._handle
+        else:
+            return None
+
+    @property
+    def series(self):
+        """Document series (`str`)."""
+        if hasattr(self, '_series'):
+            return self._series
+        else:
+            return None
+
+    @property
+    def serial(self):
+        """Document serial number within series (`str`)."""
+        if hasattr(self, '_serial'):
+            return self._serial
+        else:
+            return None
+
     def _parse_title(self):
         """Parse the title from TeX source."""
         match = TITLE_PATTERN.search(self._tex)
         if match is not None:
             self._title = match.group('title')
             self._short_title = match.group('short_title')
+
+    def _parse_doc_ref(self):
+        """Parse the document handle."""
+        match = DOCREF_PATTERN.search(self._tex)
+        if match is not None:
+            self._handle = match.group('handle')
+            self._series, self._serial = self._handle.split('-', 1)
 
     def _parse_author(self):
         """Parse the author from TeX source.
