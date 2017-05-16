@@ -25,3 +25,9 @@ def test_no_short_title():
     match = TITLE_PATTERN.search(sample)
     assert match.group('title') == 'Title'
     assert match.group('short_title') is None
+
+
+def test_authors(ldm_nnn_data):
+    expected = ['A. Author', 'B. Author', 'C. Author']
+    lsstdoc = LsstDoc(ldm_nnn_data)
+    assert lsstdoc.authors == expected
