@@ -1,15 +1,16 @@
-#######
-metaget
-#######
+###########
+LSST Metald
+###########
 
-**metaget is a Python library of tools for gathering metadata about software and documentation projects.
+**Metald (meta linked data; pronounced "metal d") is a Python library for gathering metadata about LSST's software and documentation projects and synthesizing it into JSON-LD (linked data) resources.**
+
+This project is related to LSST DocHub, an experimental project to gather LSST information artifacts from across the web, and make them discoverable through a single API.
 DocHub adapters can use this library to create LSST DocHub JSON-LD resources.**
 
-**DocHub** is an experimental project to gather LSST information artifacts from across the web, and make them discoverable through a single API.
-**LSST**, or Large Synoptic Survey Telescope, is a wide, fast, and deep survey of the sky.
+Metald is developed by **LSST**, the Large Synoptic Survey Telescope.
 Learn more at `www.lsst.org <https://www.lsst.org>`_.
 
 License
 =======
 
-metaget is MIT licensed. See `LICENSE <./LICENSE>`_.
+Metald is MIT licensed. See `LICENSE <./LICENSE>`_.
