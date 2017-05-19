@@ -1,6 +1,7 @@
 from setuptools import setup, find_packages
 import os
 from io import open
+import versioneer
 
 
 packagename = 'metald'
@@ -24,7 +25,7 @@ long_description = read('README.rst')
 
 setup(
     name=packagename,
-    version=version,
+    version=versioneer.get_version(),
     description=description,
     long_description=long_description,
     url=url,
@@ -43,6 +44,7 @@ setup(
         'pyjwt>=1.4.2',
         'requests>=2.13.0'
     ],
+    cmdclass=versioneer.get_cmdclass()
     # package_data={},
     # entry_points={}
 )
