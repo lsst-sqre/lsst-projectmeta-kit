@@ -189,4 +189,4 @@ class LsstDoc(object):
                 break
 
         # Text inside delimiters; exclude the delimiters themselves
-        return self._tex[start+1:start+i]
+        return self._tex[start + 1:start + i]
