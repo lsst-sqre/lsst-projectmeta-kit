@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from metald.tex.lsstdoc import LsstDoc, TITLE_PATTERN
+from metasrc.tex.lsstdoc import LsstDoc, TITLE_PATTERN
 
 
 @pytest.fixture

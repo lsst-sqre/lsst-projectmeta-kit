@@ -14,6 +14,6 @@ deploy:
     secure: "XSVQcNhYflRWtfVQM3N5o3jlhSVNG+9Q49P3ZdS+q/RafE2I93cL84OhX5DXa4Q1BINlNTA/VgthTfNWPab5utLpsmJj0AJtHUDv8i3ODjV/ZSP0/0x3JFhQFMxdkDfdU//DsnDVTgO13oUEa09Remn5yMzS981vOZcWgXk8A9xaSK+4b6GPqVVvLk1nMVMDHfllUzb4QJ/OtSK2oS7tlPnCmUvMQ4B/pVR0psDjbxPy0qEfQ8G5924/tlJoDyWbrx5LLeCjLaZtotSWA4M11JhUxi5vp2enPjVw0yww8SBzaFFVKwx2hCqbK/giztRNbMgLy8eZxGA6blmnQqkv4SHLXaqq7OPDbh2tyhSMCC811KeshQqKVCAebf61rVQ5SV5+1kcPOj4blx9yUQzYnR5tL5rc6Dn/mSIB7gIDBS3yJfmUG14CszI4pA9041M0pHHV0DB/vfRQOPbNn9fXxIX69PHQCOPVnuerTzR+2DfTG6NF+SfSbnYPQnmYKq1SBngoH17v6sxIc3zueRSPWeMyBofwnDLA4JhGoZXr/KZ/hsUifLkLIVyeN5xv/xGgDAoiQDoV8J4lobKZVCZWNWoD9Yt9TtRjAkbUkAfbtHg8JbqR5M9pI0A8397/FrnrpZdWop5174lEXY3a/9zMuqt7MOimexr8laojmt8mOmQ="
   on:
     tags: true
-    repo: lsst-sqre/metald
+    repo: lsst-sqre/metasrc
   skip_upload_docs: true
   distributions: sdist bdist_wheel

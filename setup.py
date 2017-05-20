@@ -4,13 +4,12 @@ from io import open
 import versioneer
 
 
-packagename = 'metald'
+packagename = 'metasrc'
 description = 'LSST project metadata synthesis and JSON-LD export library.'
 author = 'Association of Universities for Research in Astronomy, Inc.'
 author_email = 'jsick@lsst.org'
 license = 'MIT'
-url = 'https://github.com/lsst-sqre/metald'
-version = '0.0.1'
+url = 'https://github.com/lsst-sqre/metasrc'
 
 
 def read(filename):
