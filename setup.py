@@ -1,15 +1,15 @@
 from setuptools import setup, find_packages
 import os
 from io import open
+import versioneer
 
 
-packagename = 'metaget'
-description = 'LSST project metadata gathering and JSON-LD export library.'
+packagename = 'metasrc'
+description = 'LSST project metadata synthesis and JSON-LD export library.'
 author = 'Association of Universities for Research in Astronomy, Inc.'
 author_email = 'jsick@lsst.org'
 license = 'MIT'
-url = 'https://github.com/lsst-sqre/metaget'
-version = '0.0.1'
+url = 'https://github.com/lsst-sqre/metasrc'
 
 
 def read(filename):
@@ -24,7 +24,7 @@ long_description = read('README.rst')
 
 setup(
     name=packagename,
-    version=version,
+    version=versioneer.get_version(),
     description=description,
     long_description=long_description,
     url=url,
@@ -43,6 +43,7 @@ setup(
         'pyjwt>=1.4.2',
         'requests>=2.13.0'
     ],
+    cmdclass=versioneer.get_cmdclass()
     # package_data={},
     # entry_points={}
 )
