@@ -47,3 +47,45 @@ def test_sample_handle(ldm_nnn_data):
     assert lsstdoc.handle == 'LDM-nnn'
     assert lsstdoc.series == 'LDM'
     assert lsstdoc.serial == 'nnn'
+
+
+def test_title_variations():
+    """Test variations on the title command's formatting."""
+    # Test with whitespace in title command
+    input_txt = "\\title    [Test Plan]  { \product ~Test Plan}"
+    lsstdoc = LsstDoc(input_txt)
+    assert lsstdoc.title == " \product ~Test Plan"
+    assert lsstdoc.short_title == "Test Plan"
+
+
+def test_author_variations():
+    """Test variations on the author command's formatting."""
+    input_txt = ("\\author   {William O'Mullane, Mario Juric, "
+                 "Frossie Economou}"
+                 "                  % the author(s)")
+    lsstdoc = LsstDoc(input_txt)
+    assert lsstdoc.authors == ["William O'Mullane",
+                               "Mario Juric",
+                               "Frossie Economou"]
+
+
+def test_handle_variations():
+    """Test variations on the handle command's formatting."""
+    input_txt = "\setDocRef      {LDM-503} % the reference code "
+    lsstdoc = LsstDoc(input_txt)
+    assert lsstdoc.handle == "LDM-503"
+
+
+def test_abstract_variations():
+    """Test variations on the abstract command's formatting."""
+    input_txt = ("\setDocAbstract {\n"
+                 "This is the  Test Plan for \product. In it we define terms "
+                 "associated with testing and further test specifications for "
+                 "specific items.}")
+    expected_abstract = (
+        "This is the  Test Plan for \product. In it we define terms "
+        "associated with testing and further test specifications for "
+        "specific items."
+    )
+    lsstdoc = LsstDoc(input_txt)
+    assert lsstdoc.abstract == expected_abstract
