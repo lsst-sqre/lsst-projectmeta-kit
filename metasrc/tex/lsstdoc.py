@@ -6,23 +6,26 @@ import re
 # Title regular expression
 # \\title{Title of document}"
 TITLE_PATTERN = re.compile(
-    r"\\title"  # title command
+    r"\\title\s*"  # title command, with optional whitespace
     r"(?:\[(?P<short_title>.*?)\])?"  # optional short title
+    r"\s*"  # optional whitespace between items, before braces
     r"{(?P<title>.*?)}")  # primary title
 
 # Author regular expression
 AUTHOR_PATTERN = re.compile(
     r"\\author"
+    r"\s*"  # optional whitespace between items, before braces
 )
 
 # Abstract regular expression
 ABSTRACT_PATTERN = re.compile(
     r"\\setDocAbstract"
+    r"\s*"  # optional whitespace after command, before braces
 )
 
 # Document reference (handle) regular expression
 DOCREF_PATTERN = re.compile(
-    r"\\setDocRef{(?P<handle>.*?)}"
+    r"\\setDocRef\s*{(?P<handle>.*?)}"
 )
 
 
