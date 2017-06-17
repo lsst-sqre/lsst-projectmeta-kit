@@ -2,6 +2,13 @@
 Change Log
 ##########
 
+[0.1.2] - (2017-06-17)
+======================
+
+- Add new ``metasrc.tex.texnormalizer`` module with ``remove_comments()` and ``remove_trailing_whitespace()`` functions.
+  Projects can use these functions in a pipeline to clean TeX source to make subsequent parsing tasks easier.
+  (`DM-10961 <https://jira.lsstcorp.org/browse/DM-10961>`)
+
 [0.1.1] - (2017-06-13)
 ======================
 
