@@ -40,3 +40,17 @@ def test_single_line_remove_comments():
     sample = "This is content.  % a comment"
     expected = "This is content.  "
     assert texnormalizer.remove_comments(sample) == expected
+
+
+def test_remove_single_line_trailing_whitespace():
+    sample = "This is content.    "
+    expected = "This is content."
+    assert texnormalizer.remove_trailing_whitespace(sample) == expected
+
+
+def test_multi_line_trailing_whitespace():
+    sample = ("First line.    \n"
+              "Second line. ")
+    expected = ("First line.\n"
+                "Second line.")
+    assert texnormalizer.remove_trailing_whitespace(sample) == expected
