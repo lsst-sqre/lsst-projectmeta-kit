@@ -125,3 +125,48 @@ def process_inputs(tex_source, root_dir=None):
     tex_source = input_pattern.sub(_sub_line, tex_source)
     tex_source = include_pattern.sub(_sub_line, tex_source)
     return tex_source
+
+
+def replace_macros(tex_source, macros):
+    """Replace macros in the TeX source with their content.
+
+    Parameters
+    ----------
+    tex_source : `str`
+        TeX source content.
+    macros : `dict`
+        Keys are macro names (including leading ``\``) and values are the
+        content (as `str`) of the macros. See
+        `metasrc.tex.scraper.get_macros`.
+
+    Returns
+    -------
+    tex_source : `str`
+        TeX source with known macros replaced.
+
+    Notes
+    -----
+    Macros with arguments are not supported.
+
+    Examples
+    --------
+    >>> macros = {r'\handle': 'LDM-nnn'}
+    >>> sample = r'This is document \handle.'
+    >>> replace_macros(sample, macros)
+    'This is document LDM-nnn.'
+
+    Any trailing slash after the macro command is also replaced by this
+    function.
+
+    >>> macros = {'\\product': 'Data Management'}
+    >>> sample = '\\title    [Test Plan]  { \\product\\ Test Plan}'
+    >>> replace_macros(sample, macros)
+    '\\title    [Test Plan]  { Data Management Test Plan}'
+    """
+    for macro_name, macro_content in macros.items():
+        # '\' prefix is needed to escape and match the '\' in the macro name.
+        # '\\?' suffix matches an optional trailing '\' that might be used
+        # for spacing.
+        pattern = '\\' + macro_name + '\\\\?'
+        tex_source = re.sub(pattern, macro_content, tex_source)
+    return tex_source

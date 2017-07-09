@@ -67,3 +67,23 @@ def test_read_tex_file():
     # verify that input'd and include'd content is present
     assert re.search(r'\\setDocAbstract', tex_source) is not None
     assert re.search(r'\\section{Introduction}', tex_source) is not None
+
+
+def test_replace_macros():
+    sample = (
+        r"\def \product {Data Management}" + "\n"
+        r"\title    [Test Plan]  { \product\ Test Plan}" + "\n"
+        r"\setDocAbstract {" + "\n"
+        r"This is the  Test Plan for \product.}")
+
+    expected = (
+        r"\def Data Management {Data Management}" + "\n"
+        r"\title    [Test Plan]  { Data Management Test Plan}" + "\n"
+        r"\setDocAbstract {" + "\n"
+        r"This is the  Test Plan for Data Management.}")
+
+    macros = {r'\product': 'Data Management'}
+    tex_source = texnormalizer.replace_macros(sample, macros)
+    assert re.search(r'\\product', sample) is not None  # sanity check
+    assert re.search(r'\\product', tex_source) is None
+    assert tex_source == expected
