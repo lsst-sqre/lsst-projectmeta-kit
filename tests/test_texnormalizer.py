@@ -1,6 +1,9 @@
 """Tests for the metasrc.tex.texnormalizer module.
 """
 
+import os
+import re
+
 import metasrc.tex.texnormalizer as texnormalizer
 
 
@@ -54,3 +57,13 @@ def test_multi_line_trailing_whitespace():
     expected = ("First line.\n"
                 "Second line.")
     assert texnormalizer.remove_trailing_whitespace(sample) == expected
+
+
+def test_read_tex_file():
+    project_dir = os.path.join(os.path.dirname(__file__), 'data', 'texinputs')
+    root_filepath = os.path.join(project_dir, 'LDM-nnn.tex')
+    tex_source = texnormalizer.read_tex_file(root_filepath)
+
+    # verify that input'd and include'd content is present
+    assert re.search(r'\\setDocAbstract', tex_source) is not None
+    assert re.search(r'\\section{Introduction}', tex_source) is not None
