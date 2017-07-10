@@ -2,6 +2,16 @@
 Change Log
 ##########
 
+Unreleased
+==========
+
+- Add new ``metasrc.tex.texnormalizer.read_tex_file`` function that reads a tex file and inserts reference files into the source.
+  Works with ``\input`` and ``\include`` commands.
+- New support for macro resolution in TeX source.
+  The ``metasrc.tex.scraper.get_macros`` to scrape TeX macro definitions from ``\def`` and ``\newcommand`` commands.
+  The ``metasrc.tex.texnormalizer.replace_macros`` function takes the output from ``get_macros`` and replaces macros in TeX source with the macro content.
+  Only static macros (those without arguments) are supported by these functions.
+
 [0.1.2] - (2017-06-17)
 ======================
 
