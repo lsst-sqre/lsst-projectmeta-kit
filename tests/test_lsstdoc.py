@@ -89,3 +89,13 @@ def test_abstract_variations():
     )
     lsstdoc = LsstDoc(input_txt)
     assert lsstdoc.abstract == expected_abstract
+
+
+@pytest.mark.parametrize(
+    'sample, expected',
+    [(r'\documentclass[DM,lsstdraft,toc]{lsstdoc}', True),
+     (r'\documentclass[DM,toc]{lsstdoc}', False),
+     (r'\documentclass[DM, lsstdraft, toc]{lsstdoc}', True)])
+def test_is_draft(sample, expected):
+    lsstdoc = LsstDoc(sample)
+    assert lsstdoc.is_draft == expected
