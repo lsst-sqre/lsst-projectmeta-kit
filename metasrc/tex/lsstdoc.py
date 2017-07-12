@@ -28,6 +28,12 @@ DOCREF_PATTERN = re.compile(
     r"\\setDocRef\s*{(?P<handle>.*?)}"
 )
 
+# Document class regular expression
+DOCUMENTCLASS_PATTERN = re.compile(
+    r"\\documentclass"
+    r"\s*"  # optional whitespace after command, before braces
+)
+
 
 class LsstDoc(object):
     """lsstdoc LaTeX document source.
@@ -42,6 +48,7 @@ class LsstDoc(object):
         super().__init__()
         self._tex = tex_source
 
+        self._parse_documentclass()
         self._parse_title()
         self._parse_author()
         self._parse_abstract()
@@ -102,6 +109,28 @@ class LsstDoc(object):
             return self._serial
         else:
             return None
+
+    @property
+    def is_draft(self):
+        """Document is a draft if ``'lsstdoc'`` is included in the
+        documentclass options (`bool`).
+        """
+        if hasattr(self, '_document_options'):
+            if 'lsstdraft' in self._document_options:
+                return True
+        return False
+
+    def _parse_documentclass(self):
+        """Parse documentclass options."""
+        match = DOCUMENTCLASS_PATTERN.search(self._tex)
+        if match is not None:
+            # start of options content is after the pattern match
+            start = match.end(0)
+            content = self._extract_in_brackets(start,
+                                                opening='[',
+                                                closing=']')
+            self._document_options = [opt.strip()
+                                      for opt in content.split(',')]
 
     def _parse_title(self):
         """Parse the title from TeX source."""
