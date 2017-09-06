@@ -13,6 +13,14 @@ def ldm_nnn_data():
     return source
 
 
+@pytest.fixture
+def dmtn_036_data():
+    data_path = os.path.join(os.path.dirname(__file__), 'data', 'DMTN-036.tex')
+    with open(data_path) as f:
+        source = f.read()
+    return source
+
+
 def test_sample_title(ldm_nnn_data):
     lsstdoc = LsstDoc(ldm_nnn_data)
     assert lsstdoc.title == "Title of document"
@@ -98,3 +106,10 @@ def test_abstract_variations():
 def test_is_draft(sample, expected):
     lsstdoc = LsstDoc(sample)
     assert lsstdoc.is_draft == expected
+
+
+def test_dmtn_036_title(dmtn_036_data):
+    lsstdoc = LsstDoc(dmtn_036_data)
+    assert lsstdoc.title == ("jointcal: Simultaneous Astrometry \\& "
+                             "Photometry for thousands of\nExposures with "
+                             "Large CCD Mosaics")
