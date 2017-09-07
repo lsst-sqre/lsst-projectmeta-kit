@@ -53,7 +53,7 @@ def test_title_variations():
     # Test with whitespace in title command
     input_txt = "\\title    [Test Plan]  { \product ~Test Plan}"
     lsstdoc = LsstDoc(input_txt)
-    assert lsstdoc.title == " \product ~Test Plan"
+    assert lsstdoc.title == "\product ~Test Plan"
     assert lsstdoc.short_title == "Test Plan"
 
 

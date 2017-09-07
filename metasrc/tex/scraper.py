@@ -1,21 +1,17 @@
 """TeX source scraping.
 """
 
+__all__ = ['get_macros', 'get_def_macros', 'get_newcommand_macros']
+
 import re
 
+from .commandparser import LatexCommand
 
 # Regular expressions for "\def \name {content}"
 # Expects the entire command to be on one line.
 DEF_PATTERN = re.compile(
     r"\\def\s*"  # def command with optional whitespace
     r"(?P<name>\\[a-zA-Z]*?)\s*"  # macro name with optional whitespace
-    r"{(?P<content>.*?)}")  # macro contents
-
-# Regular expressions for "\def \name {content}"
-# Does not handle arguments.
-NEWCOMMAND_PATTERN = re.compile(
-    r"\\newcommand\s*"  # def command with optional whitespace
-    r"{\s*(?P<name>\\[a-zA-Z]*?)\s*}\s*"  # macro name with optional whitespace
     r"{(?P<content>.*?)}")  # macro contents
 
 
@@ -96,6 +92,12 @@ def get_newcommand_macros(tex_source):
     ``\newcommand`` macros with arguments are not supported.
     """
     macros = {}
-    for match in NEWCOMMAND_PATTERN.finditer(tex_source):
-        macros[match.group('name')] = match.group('content')
+    command = LatexCommand(
+        'newcommand',
+        {'name': 'name', 'required': True, 'bracket': '{'},
+        {'name': 'content', 'required': True, 'bracket': '{'})
+
+    for macro in command.parse(tex_source):
+        macros[macro['name']] = macro['content']
+
     return macros
