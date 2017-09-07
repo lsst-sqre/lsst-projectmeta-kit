@@ -2,6 +2,7 @@
 """
 
 import os
+import re
 
 import pytest
 
@@ -72,3 +73,17 @@ def test_no_short_title():
 
     assert 'short_title' not in parsed
     assert 'long_title' in parsed
+
+
+@pytest.mark.parametrize(
+    'command,sample',
+    [('title', '% hello\n\\title{Hello world}'),
+     ('title', '% hello\n\\title{Hello world}\n\\titlename{Imposter}')])
+def test_command_regex(command, sample):
+    """Test the regex make my LatexCommand._make_command_regex to ensure that
+    it detects the command and not look-alike latex commands. Each sample
+    should have only one detection.
+    """
+    command_regex = LatexCommand._make_command_regex(command)
+    matches = re.findall(command_regex, sample)
+    assert len(matches) == 1

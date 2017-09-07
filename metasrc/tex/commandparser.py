@@ -57,11 +57,33 @@ class LatexCommand(object):
             Yields parsed commands instances for each occurence of the command
             in the source.
         """
-        command_regex = '\\\\' + self.name
+        command_regex = self._make_command_regex(self.name)
         for match in re.finditer(command_regex, source):
             self._logger.debug(match)
             start_index = match.start(0)
             yield self._parse_command(source, start_index)
+
+    @staticmethod
+    def _make_command_regex(name):
+        """Given a command name, build a regular expression to detect that
+        command in TeX source.
+
+        The regular expression is designed to discern "\\title{..}" from
+        "\\titlename{..}". It does this by ensuring that the command is
+        followed by a whitespace character, argument brackets, or a comment
+        character.
+
+        Parameters
+        ----------
+        name : `str`
+            Name of the command (with a backslash prefix).
+
+        Returns
+        -------
+        regex : `str`
+            Regular expression pattern for detecting the command.
+        """
+        return '\\\\' + name + '(?:[\s{[%])'
 
     def _parse_command(self, source, start_index):
         """Parse a single command.
