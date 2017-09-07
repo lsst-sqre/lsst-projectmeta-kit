@@ -2,12 +2,20 @@ import os
 
 import pytest
 
-from metasrc.tex.lsstdoc import LsstDoc, TITLE_PATTERN
+from metasrc.tex.lsstdoc import LsstDoc
 
 
 @pytest.fixture
 def ldm_nnn_data():
     data_path = os.path.join(os.path.dirname(__file__), 'data', 'LDM-nnn.tex')
+    with open(data_path) as f:
+        source = f.read()
+    return source
+
+
+@pytest.fixture
+def dmtn_036_data():
+    data_path = os.path.join(os.path.dirname(__file__), 'data', 'DMTN-036.tex')
     with open(data_path) as f:
         source = f.read()
     return source
@@ -22,9 +30,8 @@ def test_sample_title(ldm_nnn_data):
 def test_no_short_title():
     """title without a short title."""
     sample = r"\title{Title}"
-    match = TITLE_PATTERN.search(sample)
-    assert match.group('title') == 'Title'
-    assert match.group('short_title') is None
+    lsstdoc = LsstDoc(sample)
+    assert lsstdoc.title == "Title"
 
 
 def test_authors(ldm_nnn_data):
@@ -54,7 +61,7 @@ def test_title_variations():
     # Test with whitespace in title command
     input_txt = "\\title    [Test Plan]  { \product ~Test Plan}"
     lsstdoc = LsstDoc(input_txt)
-    assert lsstdoc.title == " \product ~Test Plan"
+    assert lsstdoc.title == "\product ~Test Plan"
     assert lsstdoc.short_title == "Test Plan"
 
 
@@ -99,3 +106,10 @@ def test_abstract_variations():
 def test_is_draft(sample, expected):
     lsstdoc = LsstDoc(sample)
     assert lsstdoc.is_draft == expected
+
+
+def test_dmtn_036_title(dmtn_036_data):
+    lsstdoc = LsstDoc(dmtn_036_data)
+    assert lsstdoc.title == ("jointcal: Simultaneous Astrometry \\& "
+                             "Photometry for thousands of\nExposures with "
+                             "Large CCD Mosaics")

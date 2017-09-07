@@ -2,8 +2,16 @@
 Change Log
 ##########
 
-[0.1.3] - (2017-07-12)
-======================
+0.1.4 (2017-09-07)
+==================
+
+- Add new ``metasrc.tex.commandparser.LatexCommand`` to extract argument content for LaTeX commands using stream parsing and bracket matching.
+  This is an improvement on the regular expression matching used by ``LsstDoc`` that was brittle to multi-line commands. (`DM-11821 <https://jira.lsstcorp.org/browse/DM-11821>`_)
+- Port ``metasrc.tex.lsstdoc.LsstDoc`` to use ``LatexCommand`` (no external API changes).
+- Port ``metasrc.tex.scraper.get_newcommand_macros`` to use ``LatexCommand`` (no external API changes).
+
+0.1.3 (2017-07-12)
+==================
 
 - Add new ``metasrc.tex.texnormalizer.read_tex_file`` function that reads a tex file and inserts reference files into the source.
   Works with ``\input`` and ``\include`` commands.
@@ -14,20 +22,20 @@ Change Log
 - Add ``LsstDoc.is_draft`` property.
   This property is ``True`` if the ``lsstdraft`` option is in the ``documentclass`` declaration.
 
-[0.1.2] - (2017-06-17)
-======================
+0.1.2 (2017-06-17)
+==================
 
 - Add new ``metasrc.tex.texnormalizer`` module with ``remove_comments()` and ``remove_trailing_whitespace()`` functions.
   Projects can use these functions in a pipeline to clean TeX source to make subsequent parsing tasks easier.
   (`DM-10961 <https://jira.lsstcorp.org/browse/DM-10961>`)
 
-[0.1.1] - (2017-06-13)
-======================
+0.1.1 (2017-06-13)
+==================
 
 - Make regular expressions for parsing lsstdoc TeX documents more flexible with respect to internal whitespace (`DM-10920 <https://jira.lsstcorp.org/browse/DM-10920>`_).
 
-[0.1.0] - (2017-05-24)
-======================
+0.1.0 (2017-05-24)
+==================
 
 - Initial version.
 - ``metasrc.github.auth`` module support GitHub authentication using their integrations API.
