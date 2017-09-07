@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from metasrc.tex.lsstdoc import LsstDoc, TITLE_PATTERN
+from metasrc.tex.lsstdoc import LsstDoc
 
 
 @pytest.fixture
@@ -22,9 +22,8 @@ def test_sample_title(ldm_nnn_data):
 def test_no_short_title():
     """title without a short title."""
     sample = r"\title{Title}"
-    match = TITLE_PATTERN.search(sample)
-    assert match.group('title') == 'Title'
-    assert match.group('short_title') is None
+    lsstdoc = LsstDoc(sample)
+    assert lsstdoc.title == "Title"
 
 
 def test_authors(ldm_nnn_data):
