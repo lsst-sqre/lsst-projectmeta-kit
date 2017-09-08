@@ -113,3 +113,53 @@ def test_dmtn_036_title(dmtn_036_data):
     assert lsstdoc.title == ("jointcal: Simultaneous Astrometry \\& "
                              "Photometry for thousands of\nExposures with "
                              "Large CCD Mosaics")
+
+
+def test_html_title():
+    sample = "\\title{``Complex'' title \\textit{like} $1+2$}"
+    expected = ('“Complex” title <em>like</em> '
+                '<span class="math inline">1\u2005+\u20052</span>\n')
+    lsstdoc = LsstDoc(sample)
+    converted = lsstdoc.html_title
+    assert converted == expected
+
+
+def test_dmtn_036_html_title(dmtn_036_data):
+    lsstdoc = LsstDoc(dmtn_036_data)
+    expected = (
+        "jointcal: Simultaneous Astrometry &amp; Photometry for thousands of "
+        "Exposures with Large CCD Mosaics\n"
+    )
+    assert lsstdoc.html_title == expected
+
+
+def test_dmtn_036_html_short_title(dmtn_036_data):
+    lsstdoc = LsstDoc(dmtn_036_data)
+    expected = "jointcal\n"
+    assert lsstdoc.html_short_title == expected
+
+
+def test_dmtn_036_html_authors(dmtn_036_data):
+    lsstdoc = LsstDoc(dmtn_036_data)
+    expected = [
+        "John Parejko (University of Washington)\n",
+        "Pierre Astier (LPNHE/IN2P3/CNRS Paris)\n"
+    ]
+    assert lsstdoc.html_authors == expected
+
+
+def test_dmtn_036_html_abstract(dmtn_036_data):
+    lsstdoc = LsstDoc(dmtn_036_data)
+    expected = (
+        "<p>The jointcal package simultaneously optimizes the astrometric and "
+        "photometric calibrations of a set of astronomical images. In "
+        "principle and often in practice, this approach produces distortion "
+        "and thoroughput models which are more precise than when fitted "
+        "independently. This is especially true when the images are deeper "
+        "than the astrometric reference catalogs. In the “Astromatic” "
+        "software suite, this simultaneous astrometry functionality is "
+        "fulfilled by “SCAMP”. The code we describe here has similar aims, "
+        "but follows a slightly different route. Jointcal is built on top of "
+        "the the LSST Data Management software stack.</p>\n"
+    )
+    assert lsstdoc.html_abstract == expected

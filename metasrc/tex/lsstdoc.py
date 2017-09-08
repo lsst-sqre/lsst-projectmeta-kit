@@ -5,6 +5,7 @@ __all__ = ['LsstDoc']
 import logging
 
 from .commandparser import LatexCommand
+from ..pandoc.convert import convert_text
 
 
 class LsstDoc(object):
@@ -23,12 +24,24 @@ class LsstDoc(object):
         self._tex = tex_source
 
     @property
+    def html_title(self):
+        """HTML5-formatted document title (`str`)."""
+        return self.format_title(format='html5', deparagraph=True,
+                                 mathjax=False, smart=True)
+
+    @property
     def title(self):
         """LaTeX-formatted document title (`str`)."""
         if not hasattr(self, '_title'):
             self._parse_title()
 
         return self._title
+
+    @property
+    def html_short_title(self):
+        """HTML5-formatted document short title (`str`)."""
+        return self.format_short_title(format='html5', deparagraph=True,
+                                       mathjax=False, smart=True)
 
     @property
     def short_title(self):
@@ -39,12 +52,24 @@ class LsstDoc(object):
         return self._short_title
 
     @property
+    def html_authors(self):
+        """HTML5-formatted authors (`list` of `str`)."""
+        return self.format_authors(format='html5', deparagraph=True,
+                                   mathjax=False, smart=True)
+
+    @property
     def authors(self):
         """LaTeX-formatted authors (`list` of `str`)."""
         if not hasattr(self, '_authors'):
             self._parse_author()
 
         return self._authors
+
+    @property
+    def html_abstract(self):
+        """HTML5-formatted document abstract (`str`)."""
+        return self.format_abstract(format='html5', deparagraph=False,
+                                    mathjax=False, smart=True)
 
     @property
     def abstract(self):
@@ -90,6 +115,145 @@ class LsstDoc(object):
             return True
         else:
             return False
+
+    def format_title(self, format='html5', deparagraph=True, mathjax=False,
+                     smart=True, extra_args=None):
+        """Get the document title in the specified markup format.
+
+        Parameters
+        ----------
+        format : `str`, optional
+            Output format (such as ``'html5'`` or ``'plain'``).
+        deparagraph : `bool`, optional
+            Remove the paragraph tags from single paragraph content.
+        mathjax : `bool`, optional
+            Allow pandoc to use MathJax math markup.
+        smart : `True`, optional
+            Allow pandoc to create "smart" unicode punctuation.
+        extra_args : `list`, optional
+            Additional command line flags to pass to Pandoc. See
+            `metasrc.pandoc.convert.convert_text`.
+
+        Returns
+        -------
+        output_text : `str`
+            Converted content or `None` if the title is not available in
+            the document.
+        """
+        if self.title is None:
+            return None
+
+        output_text = convert_text(
+            self.title, 'latex', 'html5',
+            deparagraph=deparagraph,
+            mathjax=mathjax,
+            smart=smart,
+            extra_args=extra_args)
+        return output_text
+
+    def format_short_title(self, format='html5', deparagraph=True,
+                           mathjax=False, smart=True, extra_args=None):
+        """Get the document short title in the specified markup format.
+
+        Parameters
+        ----------
+        format : `str`, optional
+            Output format (such as ``'html5'`` or ``'plain'``).
+        deparagraph : `bool`, optional
+            Remove the paragraph tags from single paragraph content.
+        mathjax : `bool`, optional
+            Allow pandoc to use MathJax math markup.
+        smart : `True`, optional
+            Allow pandoc to create "smart" unicode punctuation.
+        extra_args : `list`, optional
+            Additional command line flags to pass to Pandoc. See
+            `metasrc.pandoc.convert.convert_text`.
+
+        Returns
+        -------
+        output_text : `str`
+            Converted content or `None` if the short title is not available in
+            the document.
+        """
+        if self.short_title is None:
+            return None
+
+        output_text = convert_text(
+            self.short_title, 'latex', 'html5',
+            deparagraph=deparagraph,
+            mathjax=mathjax,
+            smart=smart,
+            extra_args=extra_args)
+        return output_text
+
+    def format_abstract(self, format='html5', deparagraph=False, mathjax=False,
+                        smart=True, extra_args=None):
+        """Get the document abstract in the specified markup format.
+
+        Parameters
+        ----------
+        format : `str`, optional
+            Output format (such as ``'html5'`` or ``'plain'``).
+        deparagraph : `bool`, optional
+            Remove the paragraph tags from single paragraph content.
+        mathjax : `bool`, optional
+            Allow pandoc to use MathJax math markup.
+        smart : `True`, optional
+            Allow pandoc to create "smart" unicode punctuation.
+        extra_args : `list`, optional
+            Additional command line flags to pass to Pandoc. See
+            `metasrc.pandoc.convert.convert_text`.
+
+        Returns
+        -------
+        output_text : `str`
+            Converted content or `None` if the title is not available in
+            the document.
+        """
+        if self.abstract is None:
+            return None
+
+        output_text = convert_text(
+            self.abstract, 'latex', 'html5',
+            deparagraph=deparagraph,
+            mathjax=mathjax,
+            smart=smart,
+            extra_args=extra_args)
+        return output_text
+
+    def format_authors(self, format='html5', deparagraph=True, mathjax=False,
+                       smart=True, extra_args=None):
+        """Get the document authors in the specified markup format.
+
+        Parameters
+        ----------
+        format : `str`, optional
+            Output format (such as ``'html5'`` or ``'plain'``).
+        deparagraph : `bool`, optional
+            Remove the paragraph tags from single paragraph content.
+        mathjax : `bool`, optional
+            Allow pandoc to use MathJax math markup.
+        smart : `True`, optional
+            Allow pandoc to create "smart" unicode punctuation.
+        extra_args : `list`, optional
+            Additional command line flags to pass to Pandoc. See
+            `metasrc.pandoc.convert.convert_text`.
+
+        Returns
+        -------
+        output_text : `list` of `str`
+            Sequence of author names in the specified output markup format.
+        """
+        formatted_authors = []
+        for latex_author in self.authors:
+            formatted_author = convert_text(
+                latex_author, 'latex', 'html5',
+                deparagraph=deparagraph,
+                mathjax=mathjax,
+                smart=smart,
+                extra_args=extra_args)
+            formatted_authors.append(formatted_author)
+        return formatted_authors
 
     def _parse_documentclass(self):
         """Parse documentclass options.
