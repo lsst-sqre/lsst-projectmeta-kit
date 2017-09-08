@@ -1,30 +1,10 @@
-import os
+"""Ad hoc tests of the LsstDoc class. Other test modules rigorously verify
+LsstDoc against sample documents.
+"""
 
 import pytest
 
 from metasrc.tex.lsstdoc import LsstDoc
-
-
-@pytest.fixture
-def ldm_nnn_data():
-    data_path = os.path.join(os.path.dirname(__file__), 'data', 'LDM-nnn.tex')
-    with open(data_path) as f:
-        source = f.read()
-    return source
-
-
-@pytest.fixture
-def dmtn_036_data():
-    data_path = os.path.join(os.path.dirname(__file__), 'data', 'DMTN-036.tex')
-    with open(data_path) as f:
-        source = f.read()
-    return source
-
-
-def test_sample_title(ldm_nnn_data):
-    lsstdoc = LsstDoc(ldm_nnn_data)
-    assert lsstdoc.title == "Title of document"
-    assert lsstdoc.short_title == "Short title"
 
 
 def test_no_short_title():
@@ -32,28 +12,6 @@ def test_no_short_title():
     sample = r"\title{Title}"
     lsstdoc = LsstDoc(sample)
     assert lsstdoc.title == "Title"
-
-
-def test_authors(ldm_nnn_data):
-    expected = ['A. Author', 'B. Author', 'C. Author']
-    lsstdoc = LsstDoc(ldm_nnn_data)
-    assert lsstdoc.authors == expected
-
-
-def test_sample_abstract(ldm_nnn_data):
-    expected = ("%\nThis document demonstrates how to use the LSST \\LaTeX\\ "
-                "class files to make Data Management\ndocuments. Build this "
-                "document in the normal way, making sure that the class "
-                "file is\navailable in the \\LaTeX\\ load path.")
-    lsstdoc = LsstDoc(ldm_nnn_data)
-    assert lsstdoc.abstract == expected
-
-
-def test_sample_handle(ldm_nnn_data):
-    lsstdoc = LsstDoc(ldm_nnn_data)
-    assert lsstdoc.handle == 'LDM-nnn'
-    assert lsstdoc.series == 'LDM'
-    assert lsstdoc.serial == 'nnn'
 
 
 def test_title_variations():
@@ -108,13 +66,6 @@ def test_is_draft(sample, expected):
     assert lsstdoc.is_draft == expected
 
 
-def test_dmtn_036_title(dmtn_036_data):
-    lsstdoc = LsstDoc(dmtn_036_data)
-    assert lsstdoc.title == ("jointcal: Simultaneous Astrometry \\& "
-                             "Photometry for thousands of\nExposures with "
-                             "Large CCD Mosaics")
-
-
 def test_html_title():
     sample = "\\title{``Complex'' title \\textit{like} $1+2$}"
     expected = ('“Complex” title <em>like</em> '
@@ -122,50 +73,3 @@ def test_html_title():
     lsstdoc = LsstDoc(sample)
     converted = lsstdoc.html_title
     assert converted == expected
-
-
-def test_dmtn_036_html_title(dmtn_036_data):
-    lsstdoc = LsstDoc(dmtn_036_data)
-    expected = (
-        "jointcal: Simultaneous Astrometry &amp; Photometry for thousands of "
-        "Exposures with Large CCD Mosaics\n"
-    )
-    assert lsstdoc.html_title == expected
-
-
-def test_dmtn_036_html_short_title(dmtn_036_data):
-    lsstdoc = LsstDoc(dmtn_036_data)
-    expected = "jointcal\n"
-    assert lsstdoc.html_short_title == expected
-
-
-def test_dmtn_036_html_authors(dmtn_036_data):
-    lsstdoc = LsstDoc(dmtn_036_data)
-    expected = [
-        "John Parejko (University of Washington)\n",
-        "Pierre Astier (LPNHE/IN2P3/CNRS Paris)\n"
-    ]
-    assert lsstdoc.html_authors == expected
-
-
-def test_dmtn_036_html_abstract(dmtn_036_data):
-    lsstdoc = LsstDoc(dmtn_036_data)
-    expected = (
-        "<p>The jointcal package simultaneously optimizes the astrometric and "
-        "photometric calibrations of a set of astronomical images. In "
-        "principle and often in practice, this approach produces distortion "
-        "and thoroughput models which are more precise than when fitted "
-        "independently. This is especially true when the images are deeper "
-        "than the astrometric reference catalogs. In the “Astromatic” "
-        "software suite, this simultaneous astrometry functionality is "
-        "fulfilled by “SCAMP”. The code we describe here has similar aims, "
-        "but follows a slightly different route. Jointcal is built on top of "
-        "the the LSST Data Management software stack.</p>\n"
-    )
-    assert lsstdoc.html_abstract == expected
-
-
-def test_dmtn_036_read():
-    tex_path = os.path.join(os.path.dirname(__file__), 'data', 'DMTN-036.tex')
-    lsstdoc = LsstDoc.read(tex_path)
-    assert isinstance(lsstdoc, LsstDoc)
