@@ -1,13 +1,40 @@
 """Pandoc conversion helper functions.
 """
 
-__all__ = ['convert_text']
+__all__ = ['convert_text', 'ensure_pandoc']
 
+import functools
 import logging
 
 import pypandoc
 
 
+def ensure_pandoc(func):
+    """Decorate a function that uses pypandoc to ensure that pandoc is
+    installed if necessary.
+    """
+    logger = logging.getLogger(__name__)
+
+    @functools.wraps(func)
+    def _install_and_run(*args, **kwargs):
+        try:
+            # First try to run pypandoc function
+            result = func(*args, **kwargs)
+        except OSError:
+            # Install pandoc and retry
+            message = "pandoc needed but not found. Now installing it for you."
+            logger.warning(message)
+            pypandoc.download_pandoc()
+            logger.debug("pandoc download complete")
+
+            result = func(*args, **kwargs)
+
+        return result
+
+    return _install_and_run
+
+
+@ensure_pandoc
 def convert_text(
         content, from_fmt, to_fmt, deparagraph=False, mathjax=False,
         smart=True, extra_args=None):
