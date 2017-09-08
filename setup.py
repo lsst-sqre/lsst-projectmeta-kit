@@ -41,9 +41,15 @@ setup(
     packages=find_packages(exclude=['docs', 'tests*', 'data']),
     install_requires=[
         'pyjwt>=1.4.2',
-        'requests>=2.13.0'
+        'requests>=2.13.0',
+        'pypandoc>=1.4',
+        'panflute==1.10.6'
     ],
-    cmdclass=versioneer.get_cmdclass()
+    cmdclass=versioneer.get_cmdclass(),
     # package_data={},
-    # entry_points={}
+    entry_points={
+        'console_scripts': [
+            'metasrc-deparagraph = metasrc.pandoc.filters.deparagraph:main'
+        ]
+    }
 )
