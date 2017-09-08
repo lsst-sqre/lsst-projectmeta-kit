@@ -43,8 +43,8 @@ def remove_trailing_whitespace(tex_source):
     tex_source : str
         TeX source without trailing whitespace.
     """
-    # Expression via https://stackoverflow.com/a/17350806
-    return re.sub(r'\s+$', '', tex_source, flags=re.M)
+    # Delete any space or tab characters right before a new line
+    return re.sub(r'[ \t]+$', '', tex_source, flags=re.M)
 
 
 def read_tex_file(root_filepath, root_dir=None):
