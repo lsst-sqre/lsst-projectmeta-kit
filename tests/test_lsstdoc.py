@@ -163,3 +163,9 @@ def test_dmtn_036_html_abstract(dmtn_036_data):
         "the the LSST Data Management software stack.</p>\n"
     )
     assert lsstdoc.html_abstract == expected
+
+
+def test_dmtn_036_read():
+    tex_path = os.path.join(os.path.dirname(__file__), 'data', 'DMTN-036.tex')
+    lsstdoc = LsstDoc.read(tex_path)
+    assert isinstance(lsstdoc, LsstDoc)

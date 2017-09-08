@@ -6,6 +6,8 @@ import logging
 
 from .commandparser import LatexCommand
 from ..pandoc.convert import convert_text
+from .scraper import get_macros
+from .texnormalizer import read_tex_file, replace_macros
 
 
 class LsstDoc(object):
@@ -22,6 +24,33 @@ class LsstDoc(object):
         self._logger = logging.getLogger(__name__)
 
         self._tex = tex_source
+
+    @classmethod
+    def read(cls, root_tex_path):
+        """Construct an `LsstDoc` instance by reading and parsing the LaTeX
+        source.
+
+        Parameters
+        ----------
+        root_tex_path : `str`
+            Path to the LaTeX source on the filesystem. For multi-file LaTeX
+            projects this should be the path to the root document.
+
+        Notes
+        -----
+        This method implements the following pipeline:
+
+        1. `metasrc.tex.texnormalizer.read_tex_file`
+        2. `metasrc.tex.scraper.get_macros`
+        3. `metasrc.tex.texnormalizer.replace_macros`
+
+        Thus ``input`` and ``includes`` are resolved along with simple macros.
+        """
+        # Read and normalize the TeX source, replacing macros with content
+        tex_source = read_tex_file(root_tex_path)
+        tex_macros = get_macros(tex_source)
+        tex_source = replace_macros(tex_source, tex_macros)
+        return cls(tex_source)
 
     @property
     def html_title(self):
