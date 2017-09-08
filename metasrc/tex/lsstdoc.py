@@ -2,6 +2,8 @@
 
 __all__ = ['LsstDoc']
 
+import logging
+
 from .commandparser import LatexCommand
 
 
@@ -16,82 +18,84 @@ class LsstDoc(object):
 
     def __init__(self, tex_source):
         super().__init__()
-        self._tex = tex_source
+        self._logger = logging.getLogger(__name__)
 
-        self._parse_documentclass()
-        self._parse_title()
-        self._parse_author()
-        self._parse_abstract()
-        self._parse_doc_ref()
+        self._tex = tex_source
 
     @property
     def title(self):
-        """Document title (`str`)."""
-        if hasattr(self, '_title'):
-            return self._title
-        else:
-            return None
+        """LaTeX-formatted document title (`str`)."""
+        if not hasattr(self, '_title'):
+            self._parse_title()
+
+        return self._title
 
     @property
     def short_title(self):
-        """Document short title (`str`)."""
-        if hasattr(self, '_short_title'):
-            return self._short_title
-        else:
-            return None
+        """LaTeX-formatted document short title (`str`)."""
+        if not hasattr(self, '_short_title'):
+            self._parse_title()
+
+        return self._short_title
 
     @property
     def authors(self):
-        """Authors (`list` of `str`)."""
-        if hasattr(self, '_authors'):
-            return self._authors
-        else:
-            return []
+        """LaTeX-formatted authors (`list` of `str`)."""
+        if not hasattr(self, '_authors'):
+            self._parse_author()
+
+        return self._authors
 
     @property
     def abstract(self):
-        """Abstract (`str`)."""
-        if hasattr(self, '_abstract'):
-            return self._abstract
-        else:
-            return None
+        """LaTeX-formatted abstract (`str`)."""
+        if not hasattr(self, '_abstract'):
+            self._parse_abstract()
+
+        return self._abstract
 
     @property
     def handle(self):
-        """Document handle (`str`)."""
-        if hasattr(self, '_handle'):
-            return self._handle
-        else:
-            return None
+        """LaTeX-formatted document handle (`str`)."""
+        if not hasattr(self, '_handle'):
+            self._parse_doc_ref()
+
+        return self._handle
 
     @property
     def series(self):
-        """Document series (`str`)."""
-        if hasattr(self, '_series'):
-            return self._series
-        else:
-            return None
+        """Document series identifier (`str`)."""
+        if not hasattr(self, '_series'):
+            self._parse_doc_ref()
+
+        return self._series
 
     @property
     def serial(self):
         """Document serial number within series (`str`)."""
-        if hasattr(self, '_serial'):
-            return self._serial
-        else:
-            return None
+        if not hasattr(self, '_serial'):
+            self._parse_doc_ref()
+
+        return self._serial
 
     @property
     def is_draft(self):
         """Document is a draft if ``'lsstdoc'`` is included in the
         documentclass options (`bool`).
         """
-        if hasattr(self, '_document_options'):
-            if 'lsstdraft' in self._document_options:
-                return True
-        return False
+        if not hasattr(self, '_document_options'):
+            self._parse_documentclass()
+
+        if 'lsstdraft' in self._document_options:
+            return True
+        else:
+            return False
 
     def _parse_documentclass(self):
-        """Parse documentclass options."""
+        """Parse documentclass options.
+
+        Sets the the ``_document_options`` attribute.
+        """
         command = LatexCommand(
             'documentclass',
             {'name': 'options', 'required': False, 'bracket': '['},
@@ -99,17 +103,25 @@ class LsstDoc(object):
         try:
             parsed = next(command.parse(self._tex))
         except StopIteration:
-            return
+            self._logger.warning('lsstdoc has no documentclass')
+            self._document_options = []
 
         try:
             content = parsed['options']
             self._document_options = [opt.strip()
                                       for opt in content.split(',')]
         except KeyError:
-            pass
+            self._logger.warning('lsstdoc has no documentclass options')
+            self._document_options = []
 
     def _parse_title(self):
-        """Parse the title from TeX source."""
+        """Parse the title from TeX source.
+
+        Sets these attributes:
+
+        - ``_title``
+        - ``_short_title``
+        """
         command = LatexCommand(
             'title',
             {'name': 'short_title', 'required': False, 'bracket': '['},
@@ -117,30 +129,48 @@ class LsstDoc(object):
         try:
             parsed = next(command.parse(self._tex))
         except StopIteration:
-            return
+            self._logger.warning('lsstdoc has no title')
+            self._title = None
+            self._short_title = None
 
         self._title = parsed['long_title']
 
         try:
             self._short_title = parsed['short_title']
         except KeyError:
-            pass
+            self._logger.warning('lsstdoc has no short title')
+            self._short_title = None
 
     def _parse_doc_ref(self):
-        """Parse the document handle."""
+        """Parse the document handle.
+
+        Sets the ``_series``, ``_serial``, and ``_handle`` attributes.
+        """
         command = LatexCommand(
             'setDocRef',
             {'name': 'handle', 'required': True, 'bracket': '{'})
         try:
             parsed = next(command.parse(self._tex))
         except StopIteration:
+            self._logger.warning('lsstdoc has no setDocRef')
+            self._handle = None
+            self._series = None
+            self._serial = None
             return
 
         self._handle = parsed['handle']
-        self._series, self._serial = self._handle.split('-', 1)
+        try:
+            self._series, self._serial = self._handle.split('-', 1)
+        except ValueError:
+            self._logger.warning('lsstdoc handle cannot be parsed into '
+                                 'series and serial: %r', self._handle)
+            self._series = None
+            self._serial = None
 
     def _parse_author(self):
         """Parse the author from TeX source.
+
+        Sets the ``_authors`` attribute.
 
         Goal is to parse::
 
@@ -160,11 +190,15 @@ class LsstDoc(object):
         try:
             parsed = next(command.parse(self._tex))
         except StopIteration:
+            self._logger.warning('lsstdoc has no author')
+            self._authors = []
             return
 
         try:
             content = parsed['authors']
         except KeyError:
+            self._logger.warning('lsstdoc has no author')
+            self._authors = []
             return
 
         # Clean content
@@ -186,19 +220,26 @@ class LsstDoc(object):
         self._authors = authors
 
     def _parse_abstract(self):
+        """Parse the abstract from the TeX source.
+
+        Sets the ``_abstract`` attribute.
+        """
         command = LatexCommand(
             'setDocAbstract',
             {'name': 'abstract', 'required': True, 'bracket': '{'})
         try:
             parsed = next(command.parse(self._tex))
         except StopIteration:
+            self._logger.warning('lsstdoc has no abstract')
+            self._abstract = None
             return
 
         try:
             content = parsed['abstract']
         except KeyError:
+            self._logger.warning('lsstdoc has no abstract')
+            self._abstract = None
             return
 
         content = content.strip()
-        # TODO probably want to unwrap paragraphs.
         self._abstract = content
