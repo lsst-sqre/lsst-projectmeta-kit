@@ -58,8 +58,30 @@ def test_no_short_title():
     """Test parsing the title command for a trivial source sample that
     doesn't include a short title.
     """
-    sample = (r"Hello world\n\title{Title}\nFin\n"
-              r"\setDocRef{LDM-nnn}\n")
+    sample = ("Hello world\n\\title{Title}\nFin\n"
+              "\setDocRef{LDM-nnn}\n")
+    elements = [
+        {'name': 'short_title', 'required': False, 'bracket': '['},
+        {'name': 'long_title', 'required': True, 'bracket': '{'}
+    ]
+    command = LatexCommand('title', *elements)
+    parsed = next(command.parse(sample))
+
+    assert parsed['long_title'] == 'Title'
+    with pytest.raises(KeyError):
+        parsed['short_title']
+
+    assert 'short_title' not in parsed
+    assert 'long_title' in parsed
+
+
+def test_no_short_title_v2():
+    """Test parsing the title command for a trivial source sample that
+    doesn't include a short title, but where the [..]{..} does occur
+    elsewhere.
+    """
+    sample = ("Hello world\n\\title{Title}\nFin\n"
+              "\setDocRef[Trap]{LDM-nnn}\n")
     elements = [
         {'name': 'short_title', 'required': False, 'bracket': '['},
         {'name': 'long_title', 'required': True, 'bracket': '{'}
