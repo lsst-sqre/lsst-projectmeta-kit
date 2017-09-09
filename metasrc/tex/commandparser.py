@@ -131,6 +131,9 @@ class LatexCommand(object):
                               'name': element['name'],
                               'content': content.strip()}],
                             source)
+                    else:
+                        # Give up on finding an optional element
+                        break
 
             # Handle cases when the opening bracket is never found.
             if element_start is None and element['required'] is False:
