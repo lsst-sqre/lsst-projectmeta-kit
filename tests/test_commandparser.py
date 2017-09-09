@@ -87,3 +87,16 @@ def test_command_regex(command, sample):
     command_regex = LatexCommand._make_command_regex(command)
     matches = re.findall(command_regex, sample)
     assert len(matches) == 1
+
+
+def test_optional_bracket():
+    """Test parsing a command where the sole token has no brackets around it.
+    """
+    sample = "Hello.\n\n\input test.tex\n\nMore content."
+
+    command = LatexCommand(
+        'input',
+        {'name': 'filename', 'required': True, 'bracket': '{'}
+    )
+    parsed = next(command.parse(sample))
+    assert parsed['filename'] == 'test.tex'
