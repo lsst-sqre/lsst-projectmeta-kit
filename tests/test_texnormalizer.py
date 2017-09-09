@@ -4,6 +4,8 @@
 import os
 import re
 
+import pytest
+
 import metasrc.tex.texnormalizer as texnormalizer
 
 
@@ -87,3 +89,22 @@ def test_replace_macros():
     assert re.search(r'\\product', sample) is not None  # sanity check
     assert re.search(r'\\product', tex_source) is None
     assert tex_source == expected
+
+
+@pytest.mark.parametrize(
+    'sample,expected',
+    [('\input{file.tex}', 'file.tex'),
+     ('\input{dirname/file.tex}', 'dirname/file.tex'),
+     ('\input {file}%', 'file'),
+     ('\input file%', 'file'),
+     ('\input file\n', 'file'),
+     ('\input file \n', 'file'),
+     ('\include{file.tex}', 'file.tex'),
+     ('\include{dirname/file.tex}', 'dirname/file.tex'),
+     ('\include {file}%', 'file'),
+     ('\include file%', 'file'),
+     ('\include file\n', 'file'),
+     ('\include file \n', 'file')])
+def test_input_include_pattern(sample, expected):
+    match = re.search(texnormalizer.input_include_pattern, sample)
+    assert match.group('filename') == expected
