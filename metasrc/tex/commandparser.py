@@ -116,6 +116,21 @@ class LatexCommand(object):
                 if c == element['bracket']:
                     element_start = i
                     break
+                elif c == '\n':
+                    # No starting bracket on the line.
+                    if element['required'] is True:
+                        # Try to parse a single single-word token after the
+                        # command, like '\input file'
+                        content = self._parse_whitespace_argument(
+                            source[running_index:],
+                            self.name)
+                        return ParsedCommand(
+                            self.name,
+                            start_index,
+                            [{'index': element['index'],
+                              'name': element['name'],
+                              'content': content.strip()}],
+                            source)
 
             # Handle cases when the opening bracket is never found.
             if element_start is None and element['required'] is False:
@@ -131,7 +146,7 @@ class LatexCommand(object):
                 raise CommandParserError(message)
 
             # Find the closing bracket, keeping track of the number of times
-            # the same type of bracket was opening and closed.
+            # the same type of bracket was opened and closed.
             balance = 1
             for i, c in enumerate(source[element_start + 1:],
                                   start=element_start + 1):
@@ -167,6 +182,39 @@ class LatexCommand(object):
         parsed_command = ParsedCommand(self.name, start_index, parsed_elements,
                                        source)
         return parsed_command
+
+    @staticmethod
+    def _parse_whitespace_argument(source, name):
+        """Attempt to parse a single token on the first line of this source.
+
+        This method is used for parsing whitespace-delimited arguments, like
+        `\input file`. The source should ideal contain ` file` along with a
+        newline character.
+
+        >>> source = 'Line 1\\n\input test.tex\\nLine 2'
+        >>> LatexCommand._parse_whitespace_argument(source, 'input')
+        'test.tex'
+        """
+        # First match the command name itself so that we find the argument
+        # *after* the command
+        command_pattern = '\\\\(' + name + ')(?:[\s{[%])'
+        command_match = re.search(command_pattern, source)
+        if command_match is not None:
+            # Trim `source` so we only look after the command
+            source = source[command_match.end(1):]
+
+        # Find the whitespace-delimited argument itself.
+        pattern = '(?P<content>\S+)(?:[ %\t\n]+)'
+        match = re.search(pattern, source)
+        if match is None:
+            message = (
+                'When parsing {}, did not find whitespace-delimited command '
+                'argument'
+            )
+            raise CommandParserError(message.format(name))
+        content = match.group('content')
+        content.strip()
+        return content
 
 
 class ParsedCommand(object):
