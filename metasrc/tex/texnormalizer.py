@@ -8,9 +8,18 @@ import re
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
-# Regular expressions
-input_pattern = re.compile(r'\\input{(.*?)}')
-include_pattern = re.compile(r'\\include{(.*?)}')
+# Regular expression for finding input or include commands
+input_include_pattern = re.compile(
+    r'\\(?P<command>input|include)'  # command name
+    r'[ ]*?'  # optional whitespace
+    r'{*?'  # optional opening bracket
+    r'(?P<filename>[\w/\-\.]+)'  # included filename
+    r'[\}%\s]'  # closing whitespace or bracket
+)
+input_pattern = re.compile(
+    r'\\input[ ]*?{*?(?P<filename>[\w/\-\.]+)[\}%\s]')
+include_pattern = re.compile(
+    r'\\include[ ]*?{*?(?P<filename>[\w/\-\.]+)[\}%\s]')
 
 
 def remove_comments(tex_source):
@@ -107,7 +116,7 @@ def process_inputs(tex_source, root_dir=None):
 
     def _sub_line(match):
         """Function to be used with re.sub to inline files for each match."""
-        fname = match.group(1)
+        fname = match.group('filename')
         if not fname.endswith('.tex'):
             full_fname = ".".join((fname, 'tex'))
         else:
@@ -122,8 +131,7 @@ def process_inputs(tex_source, root_dir=None):
         else:
             return included_source
 
-    tex_source = input_pattern.sub(_sub_line, tex_source)
-    tex_source = include_pattern.sub(_sub_line, tex_source)
+    tex_source = input_include_pattern.sub(_sub_line, tex_source)
     return tex_source
 
 
