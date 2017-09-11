@@ -5,7 +5,7 @@ __all__ = ['LsstDoc']
 import logging
 
 from .commandparser import LatexCommand
-from ..pandoc.convert import convert_text
+from ..pandoc.convert import convert_lsstdoc_tex
 from .scraper import get_macros
 from .texnormalizer import read_tex_file, replace_macros
 
@@ -172,8 +172,8 @@ class LsstDoc(object):
         if self.title is None:
             return None
 
-        output_text = convert_text(
-            self.title, 'latex', 'html5',
+        output_text = convert_lsstdoc_tex(
+            self.title, 'html5',
             deparagraph=deparagraph,
             mathjax=mathjax,
             smart=smart,
@@ -207,8 +207,8 @@ class LsstDoc(object):
         if self.short_title is None:
             return None
 
-        output_text = convert_text(
-            self.short_title, 'latex', 'html5',
+        output_text = convert_lsstdoc_tex(
+            self.short_title, 'html5',
             deparagraph=deparagraph,
             mathjax=mathjax,
             smart=smart,
@@ -242,8 +242,8 @@ class LsstDoc(object):
         if self.abstract is None:
             return None
 
-        output_text = convert_text(
-            self.abstract, 'latex', 'html5',
+        output_text = convert_lsstdoc_tex(
+            self.abstract, 'html5',
             deparagraph=deparagraph,
             mathjax=mathjax,
             smart=smart,
@@ -275,8 +275,8 @@ class LsstDoc(object):
         """
         formatted_authors = []
         for latex_author in self.authors:
-            formatted_author = convert_text(
-                latex_author, 'latex', 'html5',
+            formatted_author = convert_lsstdoc_tex(
+                latex_author, 'html5',
                 deparagraph=deparagraph,
                 mathjax=mathjax,
                 smart=smart,
