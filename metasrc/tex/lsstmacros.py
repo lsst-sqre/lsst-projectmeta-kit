@@ -94,21 +94,21 @@ LSSTDOC_MACROS = r"""\newcommand{\latex}{LaTeX}
 \newcommand{\ds}[2]{{\color{blue} \href{https://docushare.lsst.org/docushare/dsweb/Get/#1}{#2}}\xspace}
 
 % These used to be `citeds` commands. Now just plain text with hyperlinks.
-\newcommand{\SRD}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LPM-17}{SRD}}
-\newcommand{\DPDD}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LSE-163}{DPDD}}
-\newcommand{\LSR}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LSE-29}{LSR}}
-\newcommand{\OSS}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LSE-30}{OSS}}
-\newcommand{\DMSR}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LSE-61}{DMSR}}
-\newcommand{\appsUMLdomain}{https://docushare.lsst.org/docushare/dsweb/Get/\href{LDM-133}{LDM-133}}
-\newcommand{\appsUMLusecase}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LDM-134}{LDM-134}}
-\newcommand{\SUI}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LDM-131}{SUID}}
-\newcommand{\DMSD}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LDM-148}{DMSD}}
-\newcommand{\MOPSD}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LDM-156}{MOPSD}}
-\newcommand{\DMMD}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LDM-152}{DMMD}}
-\newcommand{\DMOps}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LDM-230}{DM OpsCon}}
-\newcommand{\SDQAP}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LSE-63}{LSE-63}}
-\newcommand{\NewPCP}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LSE-180}{LSE-180}}
-\newcommand{\UCAL}{\href{https://docushare.lsst.org/docushare/dsweb/Get/Document-15125}{UCAL}}
+\newcommand{\SRD}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LPM-17}{SRD}\xspace}
+\newcommand{\DPDD}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LSE-163}{DPDD}\xspace}
+\newcommand{\LSR}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LSE-29}{LSR}\xspace}
+\newcommand{\OSS}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LSE-30}{OSS}\xspace}
+\newcommand{\DMSR}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LSE-61}{DMSR}\xspace}
+\newcommand{\appsUMLdomain}{https://docushare.lsst.org/docushare/dsweb/Get/\href{LDM-133}{LDM-133}\xspace}
+\newcommand{\appsUMLusecase}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LDM-134}{LDM-134}\xspace}
+\newcommand{\SUI}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LDM-131}{SUID}\xspace}
+\newcommand{\DMSD}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LDM-148}{DMSD}\xspace}
+\newcommand{\MOPSD}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LDM-156}{MOPSD}\xspace}
+\newcommand{\DMMD}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LDM-152}{DMMD}\xspace}
+\newcommand{\DMOps}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LDM-230}{DM OpsCon}\xspace}
+\newcommand{\SDQAP}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LSE-63}{LSE-63}\xspace}
+\newcommand{\NewPCP}{\href{https://docushare.lsst.org/docushare/dsweb/Get/LSE-180}{LSE-180}\xspace}
+\newcommand{\UCAL}{\href{https://docushare.lsst.org/docushare/dsweb/Get/Document-15125}{UCAL}\xspace}
 
 \newcommand{\wbsSFM}{WBS 02C.03.01}
 \newcommand{\wbsAssocP}{WBS 02C.03.02}
