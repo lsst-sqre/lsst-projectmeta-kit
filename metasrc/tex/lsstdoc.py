@@ -59,6 +59,12 @@ class LsstDoc(object):
                                  mathjax=False, smart=True)
 
     @property
+    def plain_title(self):
+        """Plain-text-formatted document title (`str`)."""
+        return self.format_title(format='plain', deparagraph=True,
+                                 mathjax=False, smart=True)
+
+    @property
     def title(self):
         """LaTeX-formatted document title (`str`)."""
         if not hasattr(self, '_title'):
@@ -70,6 +76,12 @@ class LsstDoc(object):
     def html_short_title(self):
         """HTML5-formatted document short title (`str`)."""
         return self.format_short_title(format='html5', deparagraph=True,
+                                       mathjax=False, smart=True)
+
+    @property
+    def plain_short_title(self):
+        """Plaintext-formatted document short title (`str`)."""
+        return self.format_short_title(format='plain', deparagraph=True,
                                        mathjax=False, smart=True)
 
     @property
@@ -87,6 +99,12 @@ class LsstDoc(object):
                                    mathjax=False, smart=True)
 
     @property
+    def plain_authors(self):
+        """Plaintext-formatted authors (`list` of `str`)."""
+        return self.format_authors(format='plain', deparagraph=True,
+                                   mathjax=False, smart=True)
+
+    @property
     def authors(self):
         """LaTeX-formatted authors (`list` of `str`)."""
         if not hasattr(self, '_authors'):
@@ -98,6 +116,12 @@ class LsstDoc(object):
     def html_abstract(self):
         """HTML5-formatted document abstract (`str`)."""
         return self.format_abstract(format='html5', deparagraph=False,
+                                    mathjax=False, smart=True)
+
+    @property
+    def plain_abstract(self):
+        """Plaintext-formatted document abstract (`str`)."""
+        return self.format_abstract(format='plain', deparagraph=False,
                                     mathjax=False, smart=True)
 
     @property
@@ -173,7 +197,7 @@ class LsstDoc(object):
             return None
 
         output_text = convert_lsstdoc_tex(
-            self.title, 'html5',
+            self.title, format,
             deparagraph=deparagraph,
             mathjax=mathjax,
             smart=smart,
@@ -243,7 +267,7 @@ class LsstDoc(object):
             return None
 
         output_text = convert_lsstdoc_tex(
-            self.abstract, 'html5',
+            self.abstract, format,
             deparagraph=deparagraph,
             mathjax=mathjax,
             smart=smart,
@@ -276,7 +300,7 @@ class LsstDoc(object):
         formatted_authors = []
         for latex_author in self.authors:
             formatted_author = convert_lsstdoc_tex(
-                latex_author, 'html5',
+                latex_author, format,
                 deparagraph=deparagraph,
                 mathjax=mathjax,
                 smart=smart,

@@ -13,6 +13,10 @@ HTML_TITLE = "Data Management Science Pipelines Design\n"
 
 HTML_SHORT_TITLE = None
 
+PLAIN_TITLE = "Data Management Science Pipelines Design\n"
+
+PLAIN_SHORT_TITLE = None
+
 AUTHORS = [
     "J.D. Swinbank",
     "T. Axelrod", "A.C. Becker", "J. Becla", "E. Bellm",
@@ -36,6 +40,19 @@ HTML_AUTHORS = [
     "P.A. Price\n", "D.J. Reiss\n", "D. Shaw\n", "C. Slater\n",
     "M. Wood-Vasey\n", "X. Wu\n", "P. Yoachim\n",
     "<em>for the LSST Data Management</em>\n"
+]
+
+PLAIN_AUTHORS = [
+    "J.D. Swinbank\n",
+    "T. Axelrod\n", "A.C. Becker\n", "J. Becla\n", "E. Bellm\n",
+    "J.F. Bosch\n", "H. Chiang\n", "D.R. Ciardi\n", "A.J. Connolly\n",
+    "G.P. Dubois-Felsmann\n", "F. Economou\n", "M. Fisher-Levine\n",
+    "M. Graham\n", "Ž. Ivezić\n", "M. Jurić\n",
+    "T. Jenness\n", "R.L. Jones\n", "J. Kantor\n", "S. Krughoff\n",
+    "K-T. Lim\n", "R.H. Lupton\n", "F. Mueller\n", "D. Petravick\n",
+    "P.A. Price\n", "D.J. Reiss\n", "D. Shaw\n", "C. Slater\n",
+    "M. Wood-Vasey\n", "X. Wu\n", "P. Yoachim\n",
+    "_for the LSST Data Management_\n"
 ]
 
 ABSTRACT = (
@@ -76,6 +93,23 @@ HTML_ABSTRACT = (
     'of those pipelines.</p>\n'
 )
 
+# NOTE there's an issue with getting spaces to appear after commands.
+# xspace doesn't work for us.
+PLAIN_ABSTRACT = (
+    "The LSST Science Requirements Document (the LSST SRD) specifies a set "
+    "of data product guidelines, designed to support science goals "
+    "envisioned to be enabled by the LSST observing program. "
+    "Following these guidlines, the details of these data products have "
+    "been described in the LSST Data Products Definition Document (DPDD), "
+    "and captured in a formal flow-down from the SRDvia the LSST System "
+    "Requirements (LSR), Observatory System Specifications (OSS), to the "
+    "Data Management System Requirements (DMSR). "
+    "The LSST Data Management subsystem’s responsibilities include the "
+    "design, implementation, deployment and execution of software pipelines "
+    "necessary to generate these data products. This document describes the "
+    "design of the scientific aspects of those pipelines.\n"
+)
+
 IS_DRAFT = False
 
 HANDLE = 'LDM-151'
@@ -89,10 +123,14 @@ ATTRIBUTES = [
     ('short_title', SHORT_TITLE),
     ('html_title', HTML_TITLE),
     ('html_short_title', HTML_SHORT_TITLE),
+    ('plain_title', PLAIN_TITLE),
+    ('plain_short_title', PLAIN_SHORT_TITLE),
     ('authors', AUTHORS),
     ('html_authors', HTML_AUTHORS),
+    ('plain_authors', PLAIN_AUTHORS),
     ('abstract', ABSTRACT),
     ('html_abstract', HTML_ABSTRACT),
+    ('plain_abstract', PLAIN_ABSTRACT),
     ('is_draft', IS_DRAFT),
     ('handle', HANDLE),
     ('series', SERIES),

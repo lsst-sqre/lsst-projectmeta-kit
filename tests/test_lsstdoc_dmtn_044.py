@@ -13,9 +13,15 @@ HTML_TITLE = "LSST DM Software Release Considerations\n"
 
 HTML_SHORT_TITLE = "DM Software Releases\n"
 
+PLAIN_TITLE = "LSST DM Software Release Considerations\n"
+
+PLAIN_SHORT_TITLE = "DM Software Releases\n"
+
 AUTHORS = ["John D. Swinbank"]
 
 HTML_AUTHORS = ["John D. Swinbank\n"]
+
+PLAIN_AUTHORS = ["John D. Swinbank\n"]
 
 ABSTRACT = (
     "This attempts to summarise the debate around, and suggest a path "
@@ -37,6 +43,16 @@ HTML_ABSTRACT = (
     "extended; corrections are welcome.</p>\n"
 )
 
+PLAIN_ABSTRACT = (
+    "This attempts to summarise the debate around, and suggest a path "
+    "forward, for LSST software releases. Although some recommendations are "
+    "made, they are intended to serve as the basis of discussion, rather "
+    "than as a complete solution.\n\n"
+    "This material is based on discussions with several team members over "
+    "a considerable period. Errors are to be expected; apologies are "
+    "extended; corrections are welcome.\n"
+)
+
 IS_DRAFT = False
 
 HANDLE = 'DMTN-044'
@@ -49,11 +65,15 @@ ATTRIBUTES = [
     ('title', TITLE),
     ('short_title', SHORT_TITLE),
     ('html_title', HTML_TITLE),
+    ('plain_title', PLAIN_TITLE),
     ('html_short_title', HTML_SHORT_TITLE),
+    ('plain_short_title', PLAIN_SHORT_TITLE),
     ('authors', AUTHORS),
     ('html_authors', HTML_AUTHORS),
+    ('plain_authors', PLAIN_AUTHORS),
     ('abstract', ABSTRACT),
     ('html_abstract', HTML_ABSTRACT),
+    ('plain_abstract', PLAIN_ABSTRACT),
     ('is_draft', IS_DRAFT),
     ('handle', HANDLE),
     ('series', SERIES),

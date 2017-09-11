@@ -19,12 +19,24 @@ HTML_TITLE = (
 
 HTML_SHORT_TITLE = "jointcal\n"
 
+PLAIN_TITLE = (
+    "jointcal: Simultaneous Astrometry & Photometry for thousands of "
+    "Exposures with Large CCD Mosaics\n"
+)
+
+PLAIN_SHORT_TITLE = "jointcal\n"
+
 AUTHORS = [
     "John Parejko (University of Washington)",
     "Pierre Astier (LPNHE/IN2P3/CNRS Paris)"
 ]
 
 HTML_AUTHORS = [
+    "John Parejko (University of Washington)\n",
+    "Pierre Astier (LPNHE/IN2P3/CNRS Paris)\n"
+]
+
+PLAIN_AUTHORS = [
     "John Parejko (University of Washington)\n",
     "Pierre Astier (LPNHE/IN2P3/CNRS Paris)\n"
 ]
@@ -42,6 +54,19 @@ HTML_ABSTRACT = (
     "the the LSST Data Management software stack.</p>\n"
 )
 
+PLAIN_ABSTRACT = (
+    "The jointcal package simultaneously optimizes the astrometric and "
+    "photometric calibrations of a set of astronomical images. In "
+    "principle and often in practice, this approach produces distortion "
+    "and thoroughput models which are more precise than when fitted "
+    "independently. This is especially true when the images are deeper "
+    "than the astrometric reference catalogs. In the “Astromatic” "
+    "software suite, this simultaneous astrometry functionality is "
+    "fulfilled by “SCAMP”. The code we describe here has similar aims, "
+    "but follows a slightly different route. Jointcal is built on top of "
+    "the the LSST Data Management software stack.\n"
+)
+
 IS_DRAFT = True
 
 HANDLE = 'DMTN-036'
@@ -55,9 +80,13 @@ ATTRIBUTES = [
     ('short_title', SHORT_TITLE),
     ('html_title', HTML_TITLE),
     ('html_short_title', HTML_SHORT_TITLE),
+    ('plain_title', PLAIN_TITLE),
+    ('plain_short_title', PLAIN_SHORT_TITLE),
     ('authors', AUTHORS),
     ('html_authors', HTML_AUTHORS),
+    ('plain_authors', PLAIN_AUTHORS),
     ('html_abstract', HTML_ABSTRACT),
+    ('plain_abstract', PLAIN_ABSTRACT),
     ('is_draft', IS_DRAFT),
     ('handle', HANDLE),
     ('series', SERIES),
