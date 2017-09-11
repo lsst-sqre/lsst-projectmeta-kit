@@ -97,6 +97,8 @@ def convert_text(
     if deparagraph:
         extra_args.append('--filter=metasrc-deparagraph')
 
+    extra_args.append('--wrap=none')
+
     # de-dup extra args
     extra_args = list(set(extra_args))
 
