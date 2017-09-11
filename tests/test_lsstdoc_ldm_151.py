@@ -53,21 +53,27 @@ ABSTRACT = (
     "design of the scientific aspects of those pipelines."
 )
 
-# NOTE: this expected output accounts for pandoc dropping unknown commands
-# like "\SRD". Really we need to fix this.
 HTML_ABSTRACT = (
-    "<p>The LSST Science Requirements Document (the LSST ) specifies a "
-    "set of data product guidelines, designed to support science goals "
-    "envisioned to be enabled by the LSST observing program. "
-    "Following these guidlines, the details of these data products have "
-    "been described in the LSST Data Products Definition Document (), "
-    "and captured in a formal flow-down from the via the LSST System "
-    "Requirements (), Observatory System Specifications (), to the "
-    "Data Management System Requirements (). "
-    "The LSST Data Management subsystem’s responsibilities include the "
-    "design, implementation, deployment and execution of software pipelines "
-    "necessary to generate these data products. This document describes the "
-    "design of the scientific aspects of those pipelines.</p>\n"
+    '<p>The LSST Science Requirements Document (the LSST '
+    '<span><a href="https://docushare.lsst.org/docushare/dsweb/Get/LPM-17">'
+    'SRD</a></span>) specifies a set of data product guidelines, designed to '
+    'support science goals envisioned to be enabled by the LSST observing '
+    'program. Following these guidlines, the details of these data products '
+    'have been described in the LSST Data Products Definition Document '
+    '(<span><a href="https://docushare.lsst.org/docushare/dsweb/Get/'
+    'LSE-163">DPDD</a></span>), and captured in a formal flow-down from '
+    'the <span><a href="https://docushare.lsst.org/docushare/dsweb/Get/'
+    'LPM-17">SRD</a></span>via the LSST System Requirements (<span>'
+    '<a href="https://docushare.lsst.org/docushare/dsweb/Get/LSE-29">'
+    'LSR</a></span>), Observatory System Specifications (<span>'
+    '<a href="https://docushare.lsst.org/docushare/dsweb/Get/LSE-30">'
+    'OSS</a></span>), to the Data Management System Requirements '
+    '(<span><a href="https://docushare.lsst.org/docushare/dsweb/Get/'
+    'LSE-61">DMSR</a></span>). The LSST Data Management subsystem’s '
+    'responsibilities include the design, implementation, deployment and '
+    'execution of software pipelines necessary to generate these data '
+    'products. This document describes the design of the scientific aspects '
+    'of those pipelines.</p>\n'
 )
 
 IS_DRAFT = False
