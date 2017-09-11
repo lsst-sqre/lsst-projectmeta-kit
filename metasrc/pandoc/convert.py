@@ -8,6 +8,8 @@ import logging
 
 import pypandoc
 
+from ..tex.lsstmacros import LSSTDOC_MACROS
+
 
 def ensure_pandoc(func):
     """Decorate a function that uses pypandoc to ensure that pandoc is
@@ -103,3 +105,53 @@ def convert_text(content, from_fmt, to_fmt, deparagraph=False, mathjax=False,
     output = pypandoc.convert_text(content, to_fmt, format=from_fmt,
                                    extra_args=extra_args)
     return output
+
+
+def convert_lsstdoc_tex(
+        content, to_fmt, deparagraph=False, mathjax=False,
+        smart=True, extra_args=None):
+    """Convert lsstdoc-class LaTeX to another markup format.
+
+    This function is a thin wrapper around `convert_text` that automatically
+    includes common lsstdoc LaTeX macros.
+
+    Parameters
+    ----------
+    content : `str`
+        Original content.
+    to_fmt : `str`
+        Output format for the content (see https://pandoc.org/MANUAL.html).
+        For example, 'html5'.
+    deparagraph : `bool`, optional
+        If `True`, then we run the
+        `metasrc.pandoc.filters.deparagraph.deparagraph` filter to remove the
+        paragraph (``<p>``, for example) tags around a single paragraph of
+        content. That filter does not affect content that consists of multiple
+        blocks (several paragraphs, or lists, for example). Default is `False`.
+    mathjax : `bool`, optional
+        If `True` then Pandoc will markup output content to work with MathJax.
+        Default is False.
+    smart : `bool`, optional
+        If `True` (default) then ascii characters will be converted to unicode
+        characters like smart quotes and em dashes.
+    extra_args : `list`, optional
+        Sequence of Pandoc arguments command line arguments (such as
+        ``'--normalize'``). The ``deparagraph``, ``mathjax``, and ``smart``
+        arguments are convenience arguments that are equivalent to items
+        in ``extra_args``.
+
+    Returns
+    -------
+    output : `str`
+        Content in the output (``to_fmt``) format.
+
+    Notes
+    -----
+    This function will automatically install Pandoc if it is not available.
+    See `ensure_pandoc`.
+    """
+    augmented_content = '\n'.join((LSSTDOC_MACROS, content))
+    return convert_text(
+        augmented_content, 'latex', to_fmt,
+        deparagraph=deparagraph, mathjax=mathjax,
+        smart=smart, extra_args=extra_args)
