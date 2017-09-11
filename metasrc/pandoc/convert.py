@@ -96,6 +96,8 @@ def convert_text(content, from_fmt, to_fmt, deparagraph=False, mathjax=False,
     if deparagraph:
         extra_args.append('--filter=metasrc-deparagraph')
 
+    extra_args.append('--wrap=none')
+
     # de-dupe extra args
     extra_args = set(extra_args)
 

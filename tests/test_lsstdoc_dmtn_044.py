@@ -31,7 +31,7 @@ HTML_ABSTRACT = (
     "<p>This attempts to summarise the debate around, and suggest a path "
     "forward, for LSST software releases. Although some recommendations are "
     "made, they are intended to serve as the basis of discussion, rather "
-    "than as a complete solution.</p>\n"
+    "than as a complete solution.</p>"
     "<p>This material is based on discussions with several team members over "
     "a considerable period. Errors are to be expected; apologies are "
     "extended; corrections are welcome.</p>\n"
