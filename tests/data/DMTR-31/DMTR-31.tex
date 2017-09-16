@@ -1,0 +1,607 @@
+
+
+\documentclass[DM,authoryear,toc]{lsstdoc}
+% lsstdoc documentation: https://lsst-texmf.lsst.io/lsstdoc.html
+
+% Package imports go here.
+
+% Local commands go here.
+
+% To add a short-form title:
+% \title[Short title]{Title}
+\title{S17B HSC PDR1 Reprocessing Report}
+
+% Optional subtitle
+% \setDocSubtitle{A subtitle}
+
+\author{%
+Hsin-Fang Chiang, Greg Daues, Samantha Thrush, and the NCSA team
+}
+
+\setDocRef{DMTR-31}
+
+\date{2017-08-28}
+
+% Optional: name of the document's curator
+% \setDocCurator{The Curator of this Document}
+
+\setDocAbstract{%
+This document captures information about the large scale HSC reprocessing we performed in Cycle S17B.
+}
+
+% Change history defined here.
+% Order: oldest first.
+% Fields: VERSION, DATE, DESCRIPTION, OWNER NAME.
+% See LPM-51 for version number policy.
+\setDocChangeRecord{%
+  \addtohist{1.0}{2017-08-21}{Initial report.}{Hsin-Fang Chiang}
+  \addtohist{1.1}{2017-08-28}{Initial report with minor revisions.}{Hsin-Fang Chiang}
+}
+
+\begin{document}
+
+% Create the title page.
+% Table of contents is added automatically with the "toc" class option.
+\maketitle
+
+% ADD CONTENT HERE
+\section{Dataset Information}
+The input dataset is the HSC Strategic Survey Program (SSP) Public Data Release 1 (PDR1) \citep{2017arXiv170208449A}.
+The PDR1 dataset has been transferred to the LSST GPFS storage \texttt{/datasets} by \jira{DM-9683} and the butler repo is available at \texttt{/datasets/hsc/repo/}.
+
+It includes 5654 visits in 7 bands: HSC-G, HSC-R, HSC-I, HSC-Y, HSC-Z, NB0816, NB0921. A file including all visit IDs is attached to the confluence page.  The official release site is at https://hsc-release.mtk.nao.ac.jp/
+The survey has three layers and includes 8 fields:
+\begin{enumerate}
+\item
+\textbf{UDEEP}: SSP{\_}UDEEP{\_}SXDS, SSP{\_}UDEEP{\_}COSMOS
+\item
+\textbf{DEEP}: SSP{\_}DEEP{\_}ELAIS{\_}N1, SSP{\_}DEEP{\_}DEEP2{\_}3, SSP{\_}DEEP{\_}XMM(S){\_}LSS, SSP{\_}DEEP{\_}COSMOS
+\item
+\textbf{WIDE}: SSP{\_}WIDE, SSP{\_}AEGIS
+\end{enumerate}
+
+The number of visits in each field and band is summarized in \tabref{tab:dataset}.
+
+\input{datasetTable}
+
+The tract IDs for each field, obtained
+from https://hsc-release.mtk.nao.ac.jp/doc/index.php/database/
+is summarized in \tabref{tab:tractIds}.
+
+\input{tractTable}
+
+Plots of tracts and patches can be found on  \url{https://hsc-release.mtk.nao.ac.jp/doc/index.php/data/}.
+In S17B, we attempted to process some edge tracts not listed in \tabref{tab:tractIds} but those data were not removed from the output repositories. Those data can be ignored; see Section \ref{summaryOutputs}.
+
+\section{Hardware}
+The processing was done using the LSST Verification Cluster.
+The Verification Cluster consists of 48 Dell C6320 nodes with 24 physical cores (2 sockets, 12 cores per processor) and 128 GB RAM. As such, the system provides a total of 1152 physical cores.
+\texttt{lsst-dev01} is a system with 24 physical cores, 256 GB RAM, running the latest CentOS 7.x that serves as the front end of the Verification Cluster.
+
+The Verification Cluster runs the Simple Linux Utility for Resource Management (SLURM) cluster management and job scheduling system. \texttt{lsst-dev01} runs the SLURM controller and serves as the login or head node , enabling LSST DM users to submit SLURM jobs to the Verification Cluster.
+
+\texttt{lsst-dev01} and the Verification Cluster utilize the General Parallel File System (GPFS) to provided shared-disk across all of the nodes. The GPFS has spaces for archived datasets and scratch space to support computation and analysis.
+
+
+
+\section{Software}
+
+The LSST Science Pipelines Software Stack is used. A shared software stack on the GPFS file systems, suitable for computation on the Verification Cluster, has been provided and is maintained by the Science Pipelines team and is available under \texttt{/software/lsstsw}.
+
+\subsection{Software Stack Version} \label{stackVersion}
+
+The stack version of \texttt{w{\_}2017{\_}17}, published on 26-Apr-2017, was used.
+Besides, the master branch of \texttt{meas{\_}mosaic}, \texttt{obs{\_}subaru}, and \texttt{ctrl{\_}pool} from 7-May-2017 and built with \texttt{w{\_}2017{\_}17} was used.
+This is equivalent to the week 17 tag with \jira{DM-10315}, \jira{DM-10449}, and \jira{DM-10430}.
+
+\subsection{Pipeline Steps and Configs}
+
+Unless otherwise noted, the HSC default config in the stack is used, including the task defaults and \texttt{obs{\_}subaru}'s overrides.
+That implies the PS1 reference catalog \texttt{ps1{\_}pv3{\_}3pi{\_}20170110} in the LSST format (HTM indexed) is used (\texttt{/datasets/refcats/htm/ps1{\_}pv3{\_}3pi{\_}20170110/}).
+The calibration dataset is the 20170105 version provided by Paul Price; the calibration repo is located at \texttt{/datasets/hsc/calib/20170105} (\jira{DM-9978}).
+The externally provided bright object masks (butler type "brightObjectMask") of version "Arcturus" (\jira{DM-10436}) are added to the repo and applied in \texttt{coaddDriver.assembleCoadd}.
+
+The steps are:
+\begin{enumerate}
+\item
+makeSkyMap.py
+\item
+singleFrameDriver.py
+\begin{enumerate}
+\item [-]
+Note: Ignore ccd=9 which has bad amps and results not trustworthy even if processCcd passes
+\end{enumerate}
+\item
+mosaic.py
+\item
+coaddDriver.py
+\begin{enumerate}
+\item [-]
+Note: Make config.assembleCoadd.subregionSize small enough so a full stack of images can fit into memory at once; a trade-off between memory and i/o but doesn't matter scientifically, as the pixels are independent.
+\end{enumerate}
+\item
+multiBandDriver.py
+\item
+forcedPhotCcd.py
+\begin{enumerate}
+\item [-]
+Note: it was added late and hence was not run in the RC processing
+\end{enumerate}
+\end{enumerate}
+
+Operational configurations, such as logging configurations in \texttt{ctrl{\_}pool}, different from the tagged stack may be used (e.g. \jira{DM-10430}).
+
+In the full PDR1 reprocessing, everything was run with the same stack version and config. Reproducible failures are noted in Section \ref{reproducibleFailures}, but no reprocessing is done with a newer software version.
+
+This stack version had a known science problem about bad ellipticity residuals as reported in \jira{DM-10482}; the bug fix \jira{DM-10688} was merged to the stack on 30-May-2017 and hence was not applied in the S17B reprocessing campaign.
+
+\subsection{Units of Independent Execution}
+
+The pipelines are run no smaller than the units noted below:
+\begin{enumerate}
+\item
+\textbf{makeSkyMap.py}: One SkyMap for everything
+\item
+\textbf{singleFrameDriver.py}:  ccd (typically run per visit)
+\item
+\textbf{mosaic.py}: tract x filter, including all visits overlapping that tract in that filter.
+\item
+\textbf{coaddDriver.py}: patch x filter, including all visits overlapping that patch in that filter. (typically run per tract)
+\item
+\textbf{multiBandDriver.py}:  patch, including all filters. (typically run per tract)
+\item
+\textbf{forcedPhotCcd.py}:  ccd
+\end{enumerate}
+Data of different layers (DEEP/UDEEP/WIDE) are processed separately.
+
+\subsection{Example Commands for Processing}
+\begin{enumerate}
+\item
+\begin{verbatim}
+makeSkyMap.py  makeSkyMap.py /datasets/hsc/repo --rerun private/username/path
+\end{verbatim}
+\item
+\begin{verbatim}
+singleFrameDriver.py  singleFrameDriver.py /datasets/hsc/repo
+  --rerun private/username/path --batch-type slurm
+  --mpiexec='-bind-to socket' --cores 24 --time 600 --job jobName2
+  --id ccd=0..8^10..103 visit=444
+\end{verbatim}
+\item
+\begin{verbatim}
+mosaic.py mosaic.py /datasets/hsc/repo --rerun path1:path2
+   --numCoresForRead=12 --id ccd=0..8^10..103 visit=444^446^454^456
+   tract=9856 --diagnostics --diagDir=/path/to/mosaic/diag/dir/
+\end{verbatim}
+\item
+\begin{verbatim}
+coaddDriver.py coaddDriver.py /datasets/hsc/repo --rerun path2
+  --batch-type=slurm --mpiexec='-bind-to socket' --job jobName4
+  --time 600 --nodes 1 --procs 12 --id tract=9856 filter=HSC-Y
+  --selectId ccd=0..8^10..103 visit=444^446^454^456
+\end{verbatim}
+\item
+\begin{verbatim}
+multiBandDriver.py  multiBandDriver.py /datasets/hsc/repo --rerun path2
+  --batch-type=slurm --mpiexec='-bind-to socket' --job jobName5
+  --time 5000 --nodes 1 --procs 12 --id tract=9856 filter=HSC-Y^HSC-I
+\end{verbatim}
+\item
+\begin{verbatim}
+forcedPhotCcd.py  forcedPhotCcd.py /datasets/hsc/repo --rerun path2
+   -j 12 --id ccd=0..8^10..103 visit=444
+\end{verbatim}
+\end{enumerate}
+
+\subsection{Butler HscMapper Policy Templates}
+The chosen software stack version (Section \ref{stackVersion}) implies the following templates in the Butler repositories.
+
+\begin{verbatim}
+calexp: %(pointing)05d/%(filter)s/corr/CORR-%(visit)07d-%(ccd)03d.fits
+calexpBackground: %(pointing)05d/%(filter)s/corr/BKGD-%(visit)07d-%(ccd)03d.fits
+icSrc: %(pointing)05d/%(filter)s/output/ICSRC-%(visit)07d-%(ccd)03d.fits
+src: %(pointing)05d/%(filter)s/output/SRC-%(visit)07d-%(ccd)03d.fits
+srcMatch: %(pointing)05d/%(filter)s/output/SRCMATCH-%(visit)07d-%(ccd)03d.fits
+srcMatchFull: %(pointing)05d/%(filter)s/output/SRCMATCHFULL-%(visit)07d-%(ccd)03d.fits
+ossImage: %(pointing)05d/%(filter)s/thumbs/oss-%(visit)07d-%(ccd)03d.fits
+flattenedImage: %(pointing)05d/%(filter)s/thumbs/flattened-%(visit)07d-%(ccd)03d.fits
+
+wcs: jointcal-results/%(tract)04d/wcs-%(visit)07d-%(ccd)03d.fits
+fcr: jointcal-results/%(tract)04d/fcr-%(visit)07d-%(ccd)03d.fits
+
+brightObjectMask:
+deepCoadd/BrightObjectMasks/%(tract)d/BrightObjectMask-%(tract)d-%(patch)s-%(filter)s.reg
+(externally provided)
+
+deepCoadd_tempExp:
+deepCoadd/%(filter)s/%(tract)d/%(patch)s/warp-%(filter)s-%(tract)d-%(patch)s-%(visit)d.fits
+deepCoadd_calexp:
+deepCoadd-results/%(filter)s/%(tract)d/%(patch)s/calexp-%(filter)s-%(tract)d-%(patch)s.fits
+deepCoadd_det:
+deepCoadd-results/%(filter)s/%(tract)d/%(patch)s/det-%(filter)s-%(tract)d-%(patch)s.fits
+deepCoadd_calexp_background:
+deepCoadd-results/%(filter)s/%(tract)d/%(patch)s/det_bkgd-%(filter)s-%(tract)d-%(patch)s.fits
+
+deepCoadd_meas:
+deepCoadd-results/%(filter)s/%(tract)d/%(patch)s/meas-%(filter)s-%(tract)d-%(patch)s.fits
+deepCoadd_measMatch:
+deepCoadd-results/%(filter)s/%(tract)d/%(patch)s/srcMatch-%(filter)s-%(tract)d-%(patch)s.fits
+deepCoadd_measMatchFull:
+deepCoadd-results/%(filter)s/%(tract)d/%(patch)s/srcMatchFull-%(filter)s-%(tract)d-%(patch)s.fits
+deepCoadd_mergeDet:
+deepCoadd-results/merged/%(tract)d/%(patch)s/mergeDet-%(tract)d-%(patch)s.fits
+deepCoadd_ref: deepCoadd-results/merged/%(tract)d/%(patch)s/ref-%(tract)d-%(patch)s.fits
+deepCoadd_forced_src:
+deepCoadd-results/%(filter)s/%(tract)d/%(patch)s/forced_src-%(filter)s-%(tract)d-%(patch)s.fits
+
+forced_src: %(pointing)05d/%(filter)s/tract%(tract)d/FORCEDSRC-%(visit)07d-%(ccd)03d.fits
+\end{verbatim}
+
+\section{Processing Notes}
+\subsection{Processing of the Release Candidate}
+
+A Release Candidate ("RC") dataset was defined and used in the test processing before the full processing started.
+
+The RC dataset was originally defined in \url{https://hsc-jira.astro.princeton.edu/jira/browse/HSC-1361} for \texttt{hscPipe} 3.9.0.
+The RC dataset is public and available at /datasets/. 62 visits of them were not included in PDR1: two of SSP{\_}WIDE and 60 of SSP{\_}UDEEP{\_}COSMOS.
+Those data were obtained by \jira{DM-10128} and their visit IDs are: 274 276 278 280 282 284 286 288 290 292 294 296 298 300 302 306 308 310 312 314 316 320 334 342 364 366 368 370 1236 1858 1860 1862 1878 9864 9890 11742 28354 28356 28358 28360 28362 28364 28366 28368 28370 28372 28374 28376 28378 28380 28382 28384 28386 28388 28390 28392 28394 28396 28398 28400 28402 29352.
+
+The RC dataset includes (1) 237 visits of SSP{\_}UDEEP{\_}COSMOS and (2) 83 visits of SSP{\_}WIDE, in 6 bands. Their data IDs are listed below.
+
+\begin{enumerate}
+\item Cosmos to full depth: (part of SSP{\_}UDEEP{\_}COSMOS)
+\begin{enumerate}
+\item
+HSC-G \begin{verbatim} 11690..11712:2^29324^29326^29336^29340^29350^29352
+\end{verbatim}
+\item
+HSC-R \begin{verbatim}1202..1220:2^23692^23694^23704^23706^23716^23718
+\end{verbatim}
+\item
+HSC-I \begin{verbatim}1228..1232:2^1236..1248:2^19658^19660^19662^19680^19682^19684^19694^19696
+^19698^19708^19710^19712^30482..30504:2
+\end{verbatim}
+\item
+HSC-Y \begin{verbatim}274..302:2^306..334:2^342..370:2^1858..1862:2^1868..1882:2^11718..11742:2
+^22602..22608:2^22626..22632:2^22642..22648:2^22658..22664:2
+\end{verbatim}
+\item
+HSC-Z \begin{verbatim}1166..1194:2^17900..17908:2^17926..17934:2^17944..17952:2^17962^28354..28402:2
+\end{verbatim}
+\item
+NB0921 \begin{verbatim}23038..23056:2^23594..23606:2^24298..24310:2^25810..25816:2
+\end{verbatim}
+\end{enumerate}
+\item Two tracts of wide: (part of SSP{\_}WIDE)
+\begin{enumerate}
+\item
+HSC-G \begin{verbatim}9852^9856^9860^9864^9868^9870^9888^9890^9898^9900^9904^9906^9912^11568^11572
+^11576^11582^11588^11590^11596^11598
+\end{verbatim}
+\item
+HSC-R \begin{verbatim}11442^11446^11450^11470^11476^11478^11506^11508^11532^11534
+\end{verbatim}
+\item
+HSC-I \begin{verbatim}7300^7304^7308^7318^7322^7338^7340^7344^7348^7358^7360^7374^7384^7386^19468
+^19470^19482^19484^19486
+\end{verbatim}
+\item
+HSC-Y \begin{verbatim}6478^6482^6486^6496^6498^6522^6524^6528^6532^6544^6546^6568^13152^13154
+\end{verbatim}
+\item
+HSC-Z \begin{verbatim}9708^9712^9716^9724^9726^9730^9732^9736^9740^9750^9752^9764^9772^9774^17738
+^17740^17750^17752^17754
+\end{verbatim}
+\end{enumerate}
+\end{enumerate}
+
+The \texttt{w{\_}2017{\_}17} stack and \texttt{meas{\_}mosaic} \texttt{ecfbc9d} built with \texttt{w{\_}2017{\_}17} was used in the RC reprocessing (\jira{DM-10129}).
+In singleFrameDriver, there were reproducible failures in 46 ccds from 23 visits. The failed visit/ccds are the same as those in the \texttt{w{\_}2017{\_}14} stack (\jira{DM-10084}). Their data IDs are:
+\begin{verbatim}
+ --id visit=278 ccd=95 --id visit=280 ccd=22^69 --id visit=284 ccd=61
+ --id visit=1206 ccd=77 --id visit=6478 ccd=99 --id visit=6528 ccd=24^67
+ --id visit=7344 ccd=67 --id visit=9736 ccd=67 --id visit=9868 ccd=76
+ --id visit=17738 ccd=69 --id visit=17750 ccd=58 --id visit=19468 ccd=69
+ --id visit=24308 ccd=29 --id visit=28376 ccd=69 --id visit=28380 ccd=0
+ --id visit=28382 ccd=101 --id visit=28392 ccd=102 --id visit=28394 ccd=93
+ --id visit=28396 ccd=102 --id visit=28398 ccd=95^101
+ --id visit=28400 ccd=5^10^15^23^26^40^53^55^61^68^77^84^89^92^93^94^95^99^100^101^102
+ --id visit=29324 ccd=99 --id visit=29326 ccd=47
+\end{verbatim}
+
+In WIDE, the coadd products have all 81 patches in both tracts (8766, 8767) in 5 filters, except that there is no coadd in tract 8767 patch 1,8 in HSC-R (because nothing passed the PSF quality selection there); the multiband products of all 162 patches are generated.
+
+In COSMOS, the coadd products have 77 patches in tract 9813 in HSC-G, 74 in HSC-R, 79 in HSC-I, 79 in HSC-Y, 79 in HSC-Z, and 76 in NB0921; the multiband products of 79 patches are generated.
+
+\texttt{brightObjectMask} were not applied in processing the RC dataset; but they should not affect the results. \texttt{forcedPhotCcd.py} was not run in the RC processing.
+
+\subsection{Summary of Outputs} \label{summaryOutputs}
+All processing were done with the same stack setup. Data of the three layers (UDEEP, DEEP, WIDE) were processed separately.
+The output repositories are archived at:
+\begin{verbatim}
+/datasets/hsc/repo/rerun/DM-10404/UDEEP/
+/datasets/hsc/repo/rerun/DM-10404/DEEP/
+/datasets/hsc/repo/rerun/DM-10404/WIDE/
+\end{verbatim}
+All logs are at \texttt{/datasets/hsc/repo/rerun/DM-10404/logs/}.
+
+While unnecessary, some edge tracts outside the PDR1 coverage were attempted in the processing. Those data outputs are kept in the repos as well. In other words, there are more tracts in the above output repositories than listed in the tract IDs in \tabref{tab:tractIds}. The additional data can be ignored.
+
+\subsection{Reproducible Failures} \label{reproducibleFailures}
+In singleFrameDriver/processCcd, there were reproducible failures in 78 CCDs from 74 visits. Their data IDs are:
+
+\begin{verbatim}
+ --id visit=1206 ccd=77 --id visit=6342 ccd=11 --id visit=6478 ccd=99 --id visit=6528 ccd=24
+ --id visit=6528 ccd=67 --id visit=6542 ccd=96 --id visit=7344 ccd=67 --id visit=7356 ccd=96
+ --id visit=7372 ccd=29 --id visit=9736 ccd=67 --id visit=9748 ccd=96 --id visit=9838 ccd=101
+ --id visit=9868 ccd=76 --id visit=11414 ccd=66 --id visit=13166 ccd=20
+ --id visit=13178 ccd=91 --id visit=13198 ccd=84 --id visit=13288 ccd=84
+ --id visit=15096 ccd=47 --id visit=15096 ccd=54 --id visit=15206 ccd=100
+ --id visit=16064 ccd=101 --id visit=17670 ccd=24 --id visit=17672 ccd=24
+ --id visit=17692 ccd=8 --id visit=17736 ccd=63 --id visit=17738 ccd=69
+ --id visit=17750 ccd=58 --id visit=19468 ccd=69 --id visit=23680 ccd=77
+ --id visit=23798 ccd=76 --id visit=24308 ccd=29 --id visit=25894 ccd=68
+ --id visit=29324 ccd=99 --id visit=29326 ccd=47 --id visit=29936 ccd=66
+ --id visit=29942 ccd=96 --id visit=29966 ccd=103 --id visit=30004 ccd=95
+ --id visit=30704 ccd=101 --id visit=32506 ccd=8 --id visit=33862 ccd=8
+ --id visit=33890 ccd=61 --id visit=33934 ccd=95 --id visit=33964 ccd=101
+ --id visit=34332 ccd=61 --id visit=34334 ccd=61 --id visit=34412 ccd=78
+ --id visit=34634 ccd=61 --id visit=34636 ccd=61 --id visit=34928 ccd=61
+ --id visit=34930 ccd=61 --id visit=34934 ccd=101 --id visit=34936 ccd=50
+ --id visit=34938 ccd=95 --id visit=35852 ccd=8 --id visit=35862 ccd=61
+ --id visit=35916 ccd=50 --id visit=35932 ccd=95 --id visit=36640 ccd=68
+ --id visit=37342 ccd=78 --id visit=37538 ccd=100 --id visit=37590 ccd=85
+ --id visit=37988 ccd=33 --id visit=38316 ccd=11 --id visit=38328 ccd=91
+ --id visit=38494 ccd=6 --id visit=38494 ccd=54 --id visit=42454 ccd=24
+ --id visit=42510 ccd=77 --id visit=42546 ccd=93 --id visit=44060 ccd=31
+ --id visit=44090 ccd=27 --id visit=44090 ccd=103 --id visit=44094 ccd=101
+ --id visit=44162 ccd=61 --id visit=46892 ccd=64 --id visit=47004 ccd=101
+\end{verbatim}
+
+Out of the 78 failures:
+\begin{enumerate}
+\item
+36 failed with: "Unable to match sources"
+\item
+13 failed with: "No objects passed our cuts for consideration as psf stars"
+\item
+7 failed with: "No sources remaining in match list after magnitude limit cuts"
+\item
+3 failed with: "No input matches"
+\item
+3 failed with: "Unable to measure aperture correction for required algorithm 'modelfit{\_}CModel{\_}exp': only 1 sources, but require at least 2."
+\item
+1 failed with: "All matches rejected in iteration 2"
+\item
+15 failed with: "PSF star selector found [123] candidates"
+\end{enumerate}
+
+In multiBandDriver, two patches of WIDE (tract=9934 patch=0,0  and  tract=9938 patch=0,0) failed with AssertionError as reported in \jira{DM-10574}. We excluded the failed patches from the multiBandDriver commands, and then jobs were able to complete and process all other patches. \jira{DM-10574} has then been fixed.
+
+The multiBandDriver job of WIDE tract=9457 could not finish unless patch=1,8 is excluded. However tract 9457 is actually outside of the PDR1 coverage.
+In forcedPhotCcd, fatal errors were seen about the reference of a patch does not exist; therefore some forced{\_}src were not generated. A JIRA ticket \jira{DM-10755} has been filed but not fixed as of Aug 24 2017.
+
+\subsection{Low-level Processing Details}
+
+This section includes low-level details that may only be of interest to the Operations team.
+
+The first singleFrame job started on May 8, the last multiband job was May 22, and the last forcedPhotCcd job was on Jun 1.  The processing was done using the Verification Cluster and the GPFS space mounted on it. The NCSA team was responsible of shepherding the run and resolving non-pipeline issues, with close communications with and support from the DRP team regarding the science pipelines.  The \texttt{ctrl{\_}pool} style drivers were run on the slurm cluster.
+
+The processing tasks/drivers were run as a total of 8792 slurm jobs:
+\begin{enumerate}
+\item
+514 singleFrame slurm jobs
+\item
+1555 mosaic slurm jobs
+\item
+1555 coadd slurm jobs
+\item
+362 multiband slurm jobs
+\item
+4806 forcedPhotCcd slurm jobs
+\end{enumerate}
+Their slurm job IDs can be found on the confluence page.
+
+For single frame processing, every 11 visits (an arbitrary choice to divide work into a manageable number of jobs) were grouped into one singleFrameDriver.py command, therefore 5654/11 = 514 jobs in total, and submitted each job to one worker node.  Data of the three layers (DEEP, UDEEP, WIDE) were handled separately beginning with the mosaic pipeline step.  \texttt{skymap.findTractPatchList} was used to check through each calexp, find out what tract/patch the ccd overlaps, and write into sqlite3. There are 1555 tract x filter combinations for all three layers. For each tract x filter, all overlapping visits and a template were used to make a slurm job file (similar to the .sl file as in \url{https://developer.lsst.io/services/verification.html#verification-slurm}). Similarly for coadd making, each tract x filter was a slurm job, but jobs were submitted using coaddDriver.py.  The multiband processing jobs were submitted for each tract, using multiBandDriver.py.   All numbers here included tracts that were not actually necessary (outside the PDR1 coverage).  For forcedPhotCcd, the CmdLineTask command is written into slurm job files for submission, similar to running mosaic. 21 visits (an arbitrary choice) were grouped in each slurm job in the first batch of submissions; the rest had one visit in each slurm job. In this campaign, at most 24 cores were used on one node at a time and sometimes even fewer.   We were aware that jobs were not run in the optimal way, and they are to be improved in the coming cycles.
+
+In general, when jobs failed, little effort was spent into investigation as long as the reruns were successful. There were a few transient hardware/file system issues. For example, once a known GPFS hiccup failed two jobs;
+we became aware because admins flagged an issue and we happened to match up the timings within a few minutes. But issues like that could easily happen without being noticed.
+Other examples of other non-science-pipeline failures are as below.
+
+Failures like the "black hole node" phenomenon were seen a few times. Sometimes many jobs were queued in slurm, and next morning all jobs larger than a job ID were found to be failed without any log being written.  The appearance is that Slurm scheduled numerous jobs in succession, one after another, to a faulty node with a GPFS problem, resulting in a set of failed jobs.   Jobs that started running before that failure point were able to continue as normal. Resubmissions of the same failed jobs were also good.   The observation of a succession of jobs all going to the same problematic node and failing over and over again in a short amount of time motivates an examination of the controller configuration, as there may be Slurm settings that would distribute job and avoid the scenario.
+
+There was an instance that seemed to be a butler repo race condition. When running mosaic processing, multiple jobs seemed to be doing IO with \texttt{repositoryCfg.yaml}, and jobs failed at File \texttt{python/lsst/daf/persistence/posixStorage.py}, line 189, in \texttt{putRepositoryCfg} and then \texttt{python/lsst/daf/persistence/safeFileIo.py}, line 84, in \texttt{FileForWriteOnceCompareSame}. Multiple files like "repositoryCfg.yamlGXfgIy" were left in the repo, and they are all the same.  There are two possible ways to avoid this: (1) always do a pre-run, or (2) do not let jobs write into the same output repos or share disk.
+
+Although large time limits were deliberately used in the slurm jobs, several jobs were timed out and cancelled by slurm, mostly multiband jobs. For new runs, we chose to start over with a new output repo rather than letting the driver reuse the existing data. Manual butler repo manipulation was needed to clean up bad executions or combine results.
+
+The pipe{\_}drivers submission could take a few minutes to start each job.
+
+For S17B, the job outputs were written to a production scratch space.  The rerun repos were cleaned up and failures were resolved there. Then the repos were transferred to the archived space at \texttt{/datasets}.  For transferring, a script to do parallel syncing on a worker node was used; an example is on \url{https://wiki.ncsa.illinois.edu/display/~wglick/2013/11/01/Parallel+Rsync}.
+
+
+\section{Resource Usage}
+
+\subsection{Disk Usage}
+
+Figure \ref{fig:df} shows the disk usage in the production scratch space, which was reserved purely for this S17B campaign use. Tests and failed runs wrote to this space as well.  At hour ~275, removal of some older data in this scratch space was performed so the drop should be ignored.
+\begin{figure}[htbp]
+        \begin{center}
+                 \includegraphics[width=0.45\textwidth]{figures/df_focus}
+                 \includegraphics[width=0.45\textwidth]{figures/df}
+                 \caption{Disk Usage of the production scratch space throughout the S17B reprocessing}
+                 \label{fig:df}
+        \end{center}
+\end{figure}
+
+The resultant data products included 11594219 files in total.
+The large files were typically hundreds of MBs.  The average size was around 14 MB. The file size distribution is shown in Figure \ref{fig:file_size_dist}.
+The data products were archived in 4 folders at the GPFS space \texttt{/datasets/hsc/repo/rerun/DM-10404/}.
+The number of files in each folder is shown in Figure \ref{fig:num_dir_files}.
+Below we summarize the output repositories in each folder.
+
+\begin{enumerate}
+\item
+\textbf{SFM}
+Overall there were 4664198 files.
+The smallest data products were \texttt{calexpBackground} fits files which all took up 128K each.
+The largest data products were \texttt{calexp} fits files which took up 82M each.
+The average file size was 11.7 M. The number of files above 1M was 1358136 and the number of files with size less than 1M was 3307875.
+\item
+\textbf{DEEP}
+There were 829604 files in total.
+The 2000 largest files ranged in size from 479M to 177M, all of which existed within \texttt{./deepCoadd-results} and were fits files. While the vast majority were \texttt{deepCoadd{\_}meas} fits files associated with a filter folder within deepCoadd-results, some were \texttt{deepCoadd{\_}ref} fits files which were associated with the \texttt{./deepCoadd-results/merged/} folder.
+The 2000 smallest files were all boost files of size 0B, all of which were contained within this folder path \texttt{00991/HSC-Y/tract\{number\}/forcedPhotCcd-metadata/}.
+Although all of these files considered here were in the HSC-Y filter, there existed many other similar files within the other filters as well.
+The files had an average size of 15.5M. There were 196034 files above 1M and 705548 files below.
+\item
+\textbf{UDEEP}
+There were 411557 files in total.
+The 2000 largest files here were similar to the DEEP folder described above; most of the large files were \texttt{deepCoadd{\_}meas} fits or \texttt{deepCoadd{\_}calexp} fits files located within the filter folders of \texttt{./deepCoadd-results/}, while a few of them were \texttt{deepCoadd{\_}ref} fits files located in the folder \texttt{./deepCoadd-results/merged/}.
+The files ranged in size from 446M to 172M.
+The 2000 smallest files had a situation similar to that described in the DEEP folder above: all of the smallest files were of size 0B, were boost files, and were all located in \texttt{./00814/HSC-Y/tract\{number\}/forcedPhotCcd-metadata} or other filters.
+The files had an average size of 16.7M. There were 95071 files above 1M and 316486 files below.
+\item
+\textbf{WIDE}
+There were 5688860 files in total.
+This folder by far had the largest files. Of the 2000 largest files, the largest was 1.1G and the smallest was 209M. The WIDE directory contained the only file over 1Gb. The files here were like the largest found in the DEEP folder: most of them were \texttt{deepCoadd{\_}meas} fits files located in the filter folders of \texttt{./deepCoadd-results/} while a few of them were \texttt{deepCoadd{\_}ref} fits files located within \texttt{./deepCoadd-results/merged/}.
+The 2000 smallest files were exactly like those found in the UDEEP folder above.
+The files had an average size of 15.7M. There were 1417818 files above 1M and 4271042 files below.
+\end{enumerate}
+
+\begin{figure}[htbp]
+        \begin{center}
+                 \includegraphics[width=0.6\textwidth]{figures/num_dir_files}
+                 \caption{The number of files in each output folder. Note that the y-axis here is on a log-scale.}
+                 \label{fig:num_dir_files}
+        \end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+        \begin{center}
+                 \includegraphics[width=0.6\textwidth]{figures/file_size_dist}
+                 \caption{file size distribution of the output repos. Note that the y-axis here is on a log-scale.}
+                 \label{fig:file_size_dist}
+        \end{center}
+\end{figure}
+
+Figure \ref{fig:butler_size} show the distributions for the data products in terms of butler dataset types.  All plots are in log scale.
+
+\begin{figure}[htbp]
+        \begin{center}
+                 \includegraphics[width=0.7\textwidth]{figures/butler_size_sfm}
+                 \includegraphics[width=0.7\textwidth]{figures/butler_size_duw}
+                 \caption{Size distribution across butler types}
+                 \label{fig:butler_size}
+        \end{center}
+\end{figure}
+
+\subsection{CPU Usage}
+
+The total CPU used was 79246 core-hours, that is, around 471.7 core-weeks.
+The total User CPU was 76246 core-hours, that is, around 453.8 core-weeks.
+
+The core-hours spent at each pipeline step were:
+\begin{enumerate}
+\item
+sfm: 19596.9
+\item
+mosaic: 943.2
+\item
+coadd: 5444.9
+\item
+multiband: 34127.2
+\item
+forcedPhotCcd: 19133.9
+\end{enumerate}
+The percentage is shown in Figure \ref{fig:cpuPieChart}.
+
+\begin{figure}[htbp]
+        \begin{center}
+                 \includegraphics[width=0.6\textwidth]{figures/cpuPieChart}
+                 \caption{CPU time for each pipeline}
+                 \label{fig:cpuPieChart}
+        \end{center}
+\end{figure}
+
+Figure \ref{fig:efficiency} shows the "efficiency", calculated by dividing the total cpu time by wall elapsed time * number of cores, for each pipeline.
+
+\begin{figure}[htbp]
+        \begin{center}
+                 \includegraphics[width=\textwidth]{figures/efficiency}
+                 \caption{Efficiency for each pipeline}
+                 \label{fig:efficiency}
+        \end{center}
+\end{figure}
+
+\begin{enumerate}
+\item
+A general feature of the plots is that the efficiency is observed to be bounded/limited by the fact that with ctrl{\_}pool/mpi the MPI root process was mostly idle and occupied one core.  This correlates with an upper bound for SFM of 23/24 ~0.958 , for coadd processing of 11/12 ~ 0.916, etc.
+
+\item
+sfm: Every 11 visits were grouped into one job, and each visit had 103 ccds. Thus, 1133 ccds were processed in a job, divided amongst 24 cores. Each ccd took around 2 minutes in average; in other words, roughly 90 min of wall clock elapsed time and 36 hr of accumulated CPU time per job. Efficiency was uniformly good. SingleFrameDriverTask is a ctrl{\_}pool BatchParallelTask.  The histogram below shows the CPU time of the SFM slurm jobs. The job IDs of the longest running jobs are: 51245, 51320, 51371, 51483, 51496, 51497, 51525, 51533, 51534, 51536, 51546, 51547, 51548, 51549, 51550, 51582, 51587, 51602, 51603
+\begin{figure}[htbp]
+        \begin{center}
+                 \includegraphics[width=0.6\textwidth]{figures/cpu_sfm}
+                 \caption{CPU hours of the SFM pipeline}
+                 \label{fig:cpu_sfm}
+        \end{center}
+\end{figure}
+
+\item
+mosaic: The unit of processing is each tract x filter on a node for each layer.  Mosaic jobs used 12 cores for reading source catalogs, via Python multiprocessing, but 1 core for other parts of the task; therefore we did not calculate the efficiency as it would be misleading. MosaicTask did not use ctrl{\_}pool.
+\item
+coadd: coadd jobs were chosen to process a tract on a node. One tract has 9*9=81 patches. CoaddDriverTask is a ctrl{\_}pool  BatchPoolTask. In most cases the patches were processed “12 wide” using ctrl{\_}pool, distributing the work to 12 cores on a node. Using mpi based ctrl{\_}pool in this context led to one mostly idle MPI root process and 11 workers.  As Verification nodes have 128 GB RAM, this gives on average ~ 11 GB of memory per patch, with the aggregate  able to use the 128 GB.
+\item
+MultiBandDriver is a ctrl{\_}pool  BatchPoolTask.
+Six multiband jobs (9476-mbWIDE9219, 59482-mbWIDE9737,59484-mbWIDE10050, 59485-mbWIDE10188,59486-mbWIDE16003, 59316-mbUDEEP8522) were excluded from this figure; their elapsed times were very short and had very bad efficiencies but they were from tracks outside of the survey coverage.
+\item
+Some of the forcedPhotCcd jobs run as only one task on one node had very high efficiency but this gave bad throughput.
+\item
+Figure \ref{fig:maxm} show the histograms of the maximum resident set size and the virtual memory size for mosaic and forcedPhotCcd. Memory monitoring of ctrl{\_}pool driver jobs (singleFrameDriver, coaddDriver, multiBandDriver) was problematic and we do not believe in the numbers collected, so we do not plot them.
+
+\begin{figure}[htbp]
+        \begin{center}
+                 \includegraphics[width=\textwidth]{figures/maxm_mosaic}
+                 \includegraphics[width=\textwidth]{figures/maxm_forcPhotCcd}
+                 \caption{Memory usage of mosaic and forcedPhotCcd pipelines}
+                 \label{fig:maxm}
+        \end{center}
+\end{figure}
+
+\end{enumerate}
+
+\subsection{Node Utilization}
+
+Figure \ref{fig:node} shows the node utilization throughout the campaign.
+The Verification Cluster in its optimal state has 48 compute nodes with 24 physical cores, 128 GB RAM on each node.  For the duration of the S17B reprocessing there was a peak of 45 compute nodes available. The plot does not include failed jobs or test attempts, of which the generated data do not contribute to the final results directly.
+
+\begin{figure}[htbp]
+        \begin{center}
+                 \includegraphics[width=\textwidth]{figures/nodeUtilization}
+                 \caption{hourly node usage \label{fig:node}}
+        \end{center}
+\end{figure}
+
+\section{Triggered JIRA tickets}
+Some of the stack issues identified during the S17B Reprocessing
+have been turned into actionable JIRA tickets.
+Tickets for Science Pipelines improvements are
+\jira{DM-10574} (Hit AssertionError in deblender),
+\jira{DM-10755} (forcedPhotCcd.py fails with the non-existing reference of a barely-overlapping patch),
+\jira{DM-10782} (Add bright star masks to ci{\_}hsc), and
+\jira{DM-10413} (Please complain louder if brightObjectMask cannot be found).
+Tickets for Middleware improvements are
+\jira{DM-10761} (Failed CmdLineTask does not give nonzero exit code; resolved by \jira{}),
+\jira{DM-10624} (Duplicate log files from running pipe{\_}drivers tasks), and
+\jira{DM-11171} (Please separate algorithmic configs and operational configs in the task framework).
+
+Many of the low-level processing issues are related to either the task framework design or the Data Butler.
+Issues related to the framework design were not turned into JIRA tickets,
+but concerns were brought to the SuperTask Working Group and Butler Working Group.
+
+
+% Include all the relevant bib files.
+% https://lsst-texmf.lsst.io/lsstdoc.html#bibliographies
+\bibliography{lsst,lsst-dm,refs_ads,refs,books}
+
+\end{document}
