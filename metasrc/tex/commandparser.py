@@ -126,11 +126,11 @@ class LatexCommand(object):
                             self.name)
                         return ParsedCommand(
                             self.name,
-                            start_index,
                             [{'index': element['index'],
                               'name': element['name'],
                               'content': content.strip()}],
-                            source)
+                            start_index,
+                            source[start_index:i])
                     else:
                         # Give up on finding an optional element
                         break
@@ -182,8 +182,9 @@ class LatexCommand(object):
 
             running_index = element_end + 1
 
-        parsed_command = ParsedCommand(self.name, start_index, parsed_elements,
-                                       source)
+        command_source = source[start_index:running_index]
+        parsed_command = ParsedCommand(self.name, parsed_elements,
+                                       start_index, command_source)
         return parsed_command
 
     @staticmethod
@@ -228,8 +229,6 @@ class ParsedCommand(object):
     name : `str`
         Name of the LaTeX command. For example, the name of the ``'\\title'``
         command is ``'title'`` (without the backslash prefix).
-    start_index : `int`
-        Character index in the ``full_source`` where the command begins.
     parsed_elements : `list`
         Parsed command elements. Each item is a `dict` with keys:
 
@@ -238,17 +237,19 @@ class ParsedCommand(object):
         - ``name``: `str` name of the element in the `LatexCommand` command
           definition, or `None` if the element is not named.
         - ``content``: `str` content of the element (tex source).
-    full_source : `str`
-        Full source of the TeX document. Used for resolving macros in content
-        and converting content to other formats (such as HTML).
+    start_index : `int`
+        Character index in the ``full_source`` where the command begins.
+    command_source : `str`
+        The full source of the parsed LaTeX command. This can be used to
+        replace the full command in the source document.
     """
 
-    def __init__(self, name, start_index, parsed_elements, full_source):
+    def __init__(self, name, parsed_elements, start_index, command_source):
         super().__init__()
         self.name = name
         self.start_index = start_index
         self._parsed_elements = parsed_elements
-        self._full_source = full_source
+        self.command_source = command_source
 
     def __getitem__(self, key):
         element = self._get_element(key)
