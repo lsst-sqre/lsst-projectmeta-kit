@@ -43,7 +43,8 @@ setup(
         'pyjwt>=1.4.2',
         'requests>=2.13.0',
         'pypandoc>=1.4',
-        'panflute==1.10.6'
+        'panflute==1.10.6',
+        'aiohttp>=2.2.5'
     ],
     cmdclass=versioneer.get_cmdclass(),
     # package_data={},
