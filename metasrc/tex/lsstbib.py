@@ -1,7 +1,8 @@
 """APIs for getting and working with the BibTeX databases in lsst-texmf.
 """
 
-__all__ = ['get_lsst_bibtex', 'get_bibliography']
+__all__ = ['get_lsst_bibtex', 'get_bibliography', 'get_url_from_entry',
+           'NoEntryUrlError', 'get_authoryear_from_entry', 'AuthorYearError']
 
 import asyncio
 import logging
@@ -172,3 +173,97 @@ def get_bibliography(lsst_bib_names=None, bibtex=None):
                 bib.add_entry(key, entry)
 
     return bib
+
+
+def get_url_from_entry(entry):
+    """Get a usable URL from a pybtex entry.
+
+    Parameters
+    ----------
+    entry : `pybtex.database.Entry`
+        A pybtex bibliography entry.
+
+    Returns
+    -------
+    url : `str`
+        Best available URL from the ``entry``.
+
+    Raises
+    ------
+    NoEntryUrlError
+        Raised when no URL can be made from the bibliography entry.
+
+    Notes
+    -----
+    The order of priority is:
+
+    1. ``url`` field
+    2. ``ls.st`` URL from the handle for ``@docushare`` entries.
+    3. ``adsurl``
+    4. DOI
+    """
+    if 'url' in entry.fields:
+        return entry.fields['url']
+    elif entry.type.lower() == 'docushare':
+        return 'https://ls.st/' + entry.fields['handle']
+    elif 'adsurl' in entry.fields:
+        return entry.fields['adsurl']
+    elif 'doi' in entry.fields:
+        return 'https://doi.org/' + entry.fields['doi']
+    else:
+        raise NoEntryUrlError()
+
+
+class NoEntryUrlError(RuntimeError):
+    """Raised when a URL cannot be resolved from a bib entry."""
+
+
+def get_authoryear_from_entry(entry, paren=False):
+    """Get and format author-year text from a pybtex entry to emulate
+    natbib citations.
+
+    Parameters
+    ----------
+    entry : `pybtex.database.Entry`
+        A pybtex bibliography entry.
+    parens : `bool`, optional
+        Whether to add parentheses around the year. Default is `False`.
+
+    Returns
+    -------
+    authoryear : `str`
+        The author-year citation text.
+    """
+    multi_author = False
+    if len(entry.persons['author']) > 0:
+        # Grab first author
+        person = entry.persons['author'][0]
+        if len(entry.persons['author']) > 1:
+            multi_author = True
+    elif len(entry.persons['editor']) > 0:
+        # Grab first editor
+        person = entry.persons['editor'][0]
+        if len(entry.persons['editor']) > 1:
+            multi_author = True
+    else:
+        raise AuthorYearError(RuntimeError)
+
+    try:
+        year = entry.fields['year']
+    except KeyError:
+        raise AuthorYearError
+
+    if paren and not multi_author:
+        template = '{author} ({year})'
+    elif not paren and not multi_author:
+        template = '{author} {year}'
+    elif paren and multi_author:
+        template = '{author} et al ({year})'
+    elif not paren and multi_author:
+        template = '{author} et al {year}'
+    return template.format(author=' '.join(person.last_names),
+                           year=year)
+
+
+class AuthorYearError(RuntimeError):
+    """Raised when an author-year citation cannot be made from a bib entry."""
