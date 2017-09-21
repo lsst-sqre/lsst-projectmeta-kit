@@ -3,11 +3,13 @@
 __all__ = ['LsstDoc']
 
 import logging
+import os
 
 from .commandparser import LatexCommand
 from ..pandoc.convert import convert_lsstdoc_tex
 from .scraper import get_macros
 from .texnormalizer import read_tex_file, replace_macros
+from .lsstbib import get_bibliography, KNOWN_LSSTTEXMF_BIB_NAMES
 
 
 class LsstDoc(object):
@@ -17,13 +19,24 @@ class LsstDoc(object):
     ----------
     tex_source : `str`
         LaTeX source for the main file of an lsstdoc LaTeX document.
+    root_dir : `str`, optional
+        Root directory of the LaTeX project. `None` is treated as the
+        current working directory.
     """
 
-    def __init__(self, tex_source):
+    def __init__(self, tex_source, root_dir=None):
         super().__init__()
         self._logger = logging.getLogger(__name__)
 
+        # The BibliographyData (parsed BibTeX) is only loaded when
+        # the self.bib_db attributed is first accessed.
+        self._bib_db = None
+
         self._tex = tex_source
+        if root_dir is None:
+            self._root_dir = ''
+        else:
+            self._root_dir = root_dir
 
     @classmethod
     def read(cls, root_tex_path):
@@ -47,10 +60,11 @@ class LsstDoc(object):
         Thus ``input`` and ``includes`` are resolved along with simple macros.
         """
         # Read and normalize the TeX source, replacing macros with content
+        root_dir = os.path.dirname(root_tex_path)
         tex_source = read_tex_file(root_tex_path)
         tex_macros = get_macros(tex_source)
         tex_source = replace_macros(tex_source, tex_macros)
-        return cls(tex_source)
+        return cls(tex_source, root_dir=root_dir)
 
     @property
     def html_title(self):
@@ -168,6 +182,16 @@ class LsstDoc(object):
             return True
         else:
             return False
+
+    @property
+    def bib_db(self):
+        """Bibliography database referenced by the document
+        (`pybtex.database.BibliographyData`).
+        """
+        if self._bib_db is None:
+            # Load reference BibTeX into a pybtex BibliographyData
+            self._load_bib_db()
+        return self._bib_db
 
     def format_title(self, format='html5', deparagraph=True, mathjax=False,
                      smart=True, extra_args=None):
@@ -462,3 +486,50 @@ class LsstDoc(object):
 
         content = content.strip()
         self._abstract = content
+
+    def _load_bib_db(self):
+        """Load the BibTeX bibliography referenced by the document.
+
+        This method triggered by the `bib_db` attribute and populates the
+        `_bib_db` private attribute.
+
+        The ``\\bibliography`` command is parsed to identify the bibliographies
+        referenced by the document.
+        """
+        # Get the names of custom bibtex files by parsing the
+        # \bibliography command and filtering out the default lsstdoc
+        # bibliographies.
+        command = LatexCommand(
+            'bibliography',
+            {'name': 'bib_names', 'required': True, 'bracket': '{'})
+        try:
+            parsed = next(command.parse(self._tex))
+            bib_names = [n.strip() for n in parsed['bib_names'].split(',')]
+        except StopIteration:
+            self._logger.warning('lsstdoc has no bibliography command')
+            bib_names = []
+        custom_bib_names = [n for n in bib_names
+                            if n not in KNOWN_LSSTTEXMF_BIB_NAMES]
+
+        # Read custom bibliographies.
+        custom_bibs = []
+        for custom_bib_name in custom_bib_names:
+            custom_bib_path = os.path.join(
+                os.path.join(self._root_dir),
+                custom_bib_name + '.bib'
+            )
+            if not os.path.exists(custom_bib_path):
+                self._logger.warning('Could not find bibliography %r',
+                                     custom_bib_path)
+                continue
+            with open(custom_bib_path, 'r') as file_handle:
+                custom_bibs.append(file_handle.read())
+        if len(custom_bibs) > 0:
+            custom_bibtex = '\n\n'.join(custom_bibs)
+        else:
+            custom_bibtex = None
+
+        # Get the combined pybtex bibliography
+        db = get_bibliography(bibtex=custom_bibtex)
+
+        self._bib_db = db

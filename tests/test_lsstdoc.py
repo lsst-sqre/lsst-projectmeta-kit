@@ -2,6 +2,7 @@
 LsstDoc against sample documents.
 """
 
+from pybtex.database import BibliographyData
 import pytest
 
 from metasrc.tex.lsstdoc import LsstDoc
@@ -73,3 +74,10 @@ def test_html_title():
     lsstdoc = LsstDoc(sample)
     converted = lsstdoc.html_title
     assert converted == expected
+
+
+def test_default_load_bib_db():
+    """Test that the common lsst-texmf bibliographies are always loaded.
+    """
+    lsstdoc = LsstDoc('')
+    assert isinstance(lsstdoc.bib_db, BibliographyData)
