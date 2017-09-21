@@ -9,8 +9,6 @@ import os
 import re
 
 
-logging.getLogger(__name__).addHandler(logging.NullHandler())
-
 # Regular expression for finding input or include commands
 input_include_pattern = re.compile(
     r'\\(?P<command>input|include)'  # command name
