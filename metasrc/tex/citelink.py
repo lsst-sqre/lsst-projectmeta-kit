@@ -2,6 +2,10 @@ __all__ = ['CitationLinker']
 
 from .commandparser import LatexCommand
 
+from .lsstbib import (
+    get_url_from_entry, NoEntryUrlError, get_authoryear_from_entry,
+    AuthorYearError)
+
 
 class CitationLinker(object):
     """LaTeX source processor that converts citation commands to ``\href``
@@ -156,5 +160,88 @@ class CitedspLinker(BaseCommandLinker):
         tex_source = tex_source.replace(
             parsed.command_source,
             href_command)
+
+        return tex_source
+
+
+class CitepLinker(BaseCommandLinker):
+    r"""Replace a ``\citep`` citation with an ``\href`` command.
+
+    Examples
+    --------
+    >>> from pybtex.database import parse_string
+    >>> bibitem = r'''
+    ... @ARTICLE{2001ApJ...550..212B,
+    ...   author = {{Bell}, E.~F. and {de Jong}, R.~S.},
+    ...   title = "{Stellar Mass-to-Light Ratios and the Tully-Fisher
+    ...     Relation}",
+    ...   journal = {\apj},
+    ...   eprint = {astro-ph/0011493},
+    ...   keywords = {ISM: Dust, Extinction, Galaxies: Evolution,
+    ...     Galaxies: Kinematics and Dynamics, Galaxies: Spiral,
+    ...     Galaxies: Stellar Content},
+    ...   year = 2001,
+    ...   month = mar,
+    ...   volume = 550,
+    ...   pages = {212-229},
+    ...   doi = {10.1086/319728},
+    ...   adsurl = {http://adsabs.harvard.edu/abs/2001ApJ...550..212B},
+    ...   adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+    ... }
+    ... '''
+    >>> bib_db = parse_string(bibitem, 'bibtex')
+    >>> link_citep = CitepLinker(bib_db)
+    >>> sample_text = r"\citep{2001ApJ...550..212B}"
+    >>> print(link_citep(sample_text))  # doctest: +ELLIPSIS
+    [\href{http://adsabs.harvard.edu/abs/2001ApJ...}{{Bell} et al 2001}]
+    """
+
+    def __init__(self, bibtex_database=None):
+        super().__init__()
+        self._db = bibtex_database
+        self.command = LatexCommand(
+            'citep',
+            {'bracket': '[', 'required': False, 'name': 'prefix'},
+            {'bracket': '[', 'required': False, 'name': 'suffix'},
+            {'bracket': '{', 'required': True, 'name': 'citekeys'}
+        )
+        self.outer_template = "[{content}]"
+        self.link_template = "\\href{{{url}}}{{{content}}}"
+
+    def _replace_command(self, tex_source, parsed):
+        cite_keys = [k.strip() for k in parsed['citekeys'].split(',')]
+
+        hrefs = []
+        for cite_key in cite_keys:
+            if self._db and cite_key in self._db.entries:
+                entry = self._db.entries[cite_key]
+                try:
+                    url = get_url_from_entry(entry)
+                except NoEntryUrlError:
+                    url = None
+
+                try:
+                    authoryear = get_authoryear_from_entry(entry, paren=False)
+                except AuthorYearError:
+                    authoryear = None
+
+                if url is not None and authoryear is not None:
+                    hrefs.append(self.link_template.format(url=url,
+                                                           content=authoryear))
+                elif url is None and authoryear is not None:
+                    # No link in this case
+                    hrefs.append(authoryear)
+                elif url is not None and authoryear is None:
+                    # Link with cite key
+                    hrefs.append(self.link_template.format(url=url,
+                                                           content=cite_key))
+                else:
+                    # Just show cite key
+                    hrefs.append(cite_key)
+
+        replacement = self.outer_template.format(content=', '.join(hrefs))
+        tex_source = tex_source.replace(
+            parsed.command_source,
+            replacement)
 
         return tex_source

@@ -3,7 +3,9 @@
 
 import pytest
 
-from metasrc.tex.citelink import CitedsLinker, CitedspLinker
+from metasrc.tex.citelink import (
+    CitedsLinker, CitedspLinker, CitepLinker)
+from metasrc.tex.lsstbib import get_bibliography
 
 
 @pytest.mark.parametrize(
@@ -36,3 +38,25 @@ def test_citeds(sample, expected):
 def test_citedsp(sample, expected):
     replace_citedsp = CitedspLinker()
     assert replace_citedsp(sample) == expected
+
+
+@pytest.mark.parametrize(
+    'sample,expected',
+    # Basic citedp command, single author
+    [('\citep{1996PASP..108..851S}',
+      '[\href{http://adsabs.harvard.edu/abs/'
+      '1996PASP..108..851S}{{Stetson} 1996}]'),
+     # Basic citep command, multi author
+     ('\citep{2017ApJ...838....5L}',
+      '[\href{http://adsabs.harvard.edu/abs/'
+      '2017ApJ...838....5L}{{Leistedt} et al 2017}]'),
+     # Basic citep command, multi author
+     ('\citep{1996PASP..108..851S, 2017ApJ...838....5L}',
+      '[\href{http://adsabs.harvard.edu/abs/'
+      '1996PASP..108..851S}{{Stetson} 1996}, '
+      '\href{http://adsabs.harvard.edu/abs/'
+      '2017ApJ...838....5L}{{Leistedt} et al 2017}]')])
+def test_citep(sample, expected):
+    db = get_bibliography()
+    replace_citep = CitepLinker(bibtex_database=db)
+    assert replace_citep(sample) == expected
