@@ -8,7 +8,7 @@ import os
 from .commandparser import LatexCommand
 from ..pandoc.convert import convert_lsstdoc_tex
 from .scraper import get_macros
-from .texnormalizer import read_tex_file, replace_macros
+from .normalizer import read_tex_file, replace_macros
 from .lsstbib import get_bibliography, KNOWN_LSSTTEXMF_BIB_NAMES
 from .citelink import CitationLinker
 
@@ -54,9 +54,9 @@ class LsstDoc(object):
         -----
         This method implements the following pipeline:
 
-        1. `metasrc.tex.texnormalizer.read_tex_file`
+        1. `metasrc.tex.normalizer.read_tex_file`
         2. `metasrc.tex.scraper.get_macros`
-        3. `metasrc.tex.texnormalizer.replace_macros`
+        3. `metasrc.tex.normalizer.replace_macros`
 
         Thus ``input`` and ``includes`` are resolved along with simple macros.
         """

@@ -1,6 +1,9 @@
 """Functions for normalizing TeX source.
 """
 
+__all__ = ['remove_comments', 'remove_trailing_whitespace', 'read_tex_file',
+           'process_inputs', 'replace_macros']
+
 import logging
 import os
 import re
