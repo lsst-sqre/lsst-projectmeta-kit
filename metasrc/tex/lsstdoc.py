@@ -10,6 +10,7 @@ from ..pandoc.convert import convert_lsstdoc_tex
 from .scraper import get_macros
 from .texnormalizer import read_tex_file, replace_macros
 from .lsstbib import get_bibliography, KNOWN_LSSTTEXMF_BIB_NAMES
+from .citelink import CitationLinker
 
 
 class LsstDoc(object):
@@ -290,8 +291,10 @@ class LsstDoc(object):
         if self.abstract is None:
             return None
 
+        abstract_latex = self._prep_snippet_for_pandoc(self.abstract)
+
         output_text = convert_lsstdoc_tex(
-            self.abstract, format,
+            abstract_latex, format,
             deparagraph=deparagraph,
             mathjax=mathjax,
             smart=smart,
@@ -486,6 +489,17 @@ class LsstDoc(object):
 
         content = content.strip()
         self._abstract = content
+
+    def _prep_snippet_for_pandoc(self, latex_text):
+        """Process a LaTeX snippet of content for better transformation
+        with pandoc.
+
+        Currently runs the CitationLinker to convert BibTeX citations to
+        href links.
+        """
+        replace_cite = CitationLinker(self.bib_db)
+        latex_text = replace_cite(latex_text)
+        return latex_text
 
     def _load_bib_db(self):
         """Load the BibTeX bibliography referenced by the document.
