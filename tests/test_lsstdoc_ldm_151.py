@@ -26,7 +26,7 @@ AUTHORS = [
     "T. Jenness", "R.L. Jones", "J. Kantor", "S. Krughoff", "K-T. Lim",
     "R.H. Lupton", "F. Mueller", "D. Petravick", "P.A. Price",
     "D.J. Reiss", "D. Shaw", "C. Slater", "M. Wood-Vasey", "X. Wu",
-    "P. Yoachim", "\emph{for the LSST Data Management}"
+    "P. Yoachim", r"\emph{for the LSST Data Management}"
 ]
 
 HTML_AUTHORS = [

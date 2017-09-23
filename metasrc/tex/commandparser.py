@@ -83,7 +83,7 @@ class LatexCommand(object):
         regex : `str`
             Regular expression pattern for detecting the command.
         """
-        return '\\\\' + name + '(?:[\s{[%])'
+        return r'\\' + name + r'(?:[\s{[%])'
 
     def _parse_command(self, source, start_index):
         """Parse a single command.
@@ -204,14 +204,14 @@ class LatexCommand(object):
         """
         # First match the command name itself so that we find the argument
         # *after* the command
-        command_pattern = '\\\\(' + name + ')(?:[\s{[%])'
+        command_pattern = r'\\(' + name + r')(?:[\s{[%])'
         command_match = re.search(command_pattern, source)
         if command_match is not None:
             # Trim `source` so we only look after the command
             source = source[command_match.end(1):]
 
         # Find the whitespace-delimited argument itself.
-        pattern = '(?P<content>\S+)(?:[ %\t\n]+)'
+        pattern = r'(?P<content>\S+)(?:[ %\t\n]+)'
         match = re.search(pattern, source)
         if match is None:
             message = (

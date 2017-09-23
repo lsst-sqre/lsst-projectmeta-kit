@@ -11,14 +11,14 @@ from metasrc.tex.lsstbib import get_bibliography
 @pytest.mark.parametrize(
     'sample,expected',
     # Basic citeds command
-    [('\citeds{LDM-151}', '\href{https://ls.st/LDM-151}{LDM-151}'),
+    [(r'\citeds{LDM-151}', r'\href{https://ls.st/LDM-151}{LDM-151}'),
      # With an alternative title text
-     ('\citeds[Pipelines Design]{LDM-151}',
-      '\href{https://ls.st/LDM-151}{Pipelines Design}'),
+     (r'\citeds[Pipelines Design]{LDM-151}',
+      r'\href{https://ls.st/LDM-151}{Pipelines Design}'),
      # Two citeds commands
-     ('\citeds[Pipelines Design]{LDM-151} \citeds{LDM-230}',
-      '\href{https://ls.st/LDM-151}{Pipelines Design} '
-      '\href{https://ls.st/LDM-230}{LDM-230}')])
+     (r'\citeds[Pipelines Design]{LDM-151} \citeds{LDM-230}',
+      r'\href{https://ls.st/LDM-151}{Pipelines Design} '
+      r'\href{https://ls.st/LDM-230}{LDM-230}')])
 def test_citeds(sample, expected):
     replace_citeds = CitedsLinker()
     assert replace_citeds(sample) == expected
@@ -27,14 +27,14 @@ def test_citeds(sample, expected):
 @pytest.mark.parametrize(
     'sample,expected',
     # Basic citedsp command
-    [('\citedsp{LDM-151}', '[\href{https://ls.st/LDM-151}{LDM-151}]'),
+    [(r'\citedsp{LDM-151}', r'[\href{https://ls.st/LDM-151}{LDM-151}]'),
      # With an alternative title text
-     ('\citedsp[Pipelines Design]{LDM-151}',
-      '[\href{https://ls.st/LDM-151}{Pipelines Design}]'),
+     (r'\citedsp[Pipelines Design]{LDM-151}',
+      r'[\href{https://ls.st/LDM-151}{Pipelines Design}]'),
      # Two citedsp commands
-     ('\citedsp[Pipelines Design]{LDM-151} \citedsp{LDM-230}',
-      '[\href{https://ls.st/LDM-151}{Pipelines Design}] '
-      '[\href{https://ls.st/LDM-230}{LDM-230}]')])
+     (r'\citedsp[Pipelines Design]{LDM-151} \citedsp{LDM-230}',
+      r'[\href{https://ls.st/LDM-151}{Pipelines Design}] '
+      r'[\href{https://ls.st/LDM-230}{LDM-230}]')])
 def test_citedsp(sample, expected):
     replace_citedsp = CitedspLinker()
     assert replace_citedsp(sample) == expected
@@ -43,19 +43,19 @@ def test_citedsp(sample, expected):
 @pytest.mark.parametrize(
     'sample,expected',
     # Basic citedp command, single author
-    [('\citep{1996PASP..108..851S}',
-      '[\href{http://adsabs.harvard.edu/abs/'
-      '1996PASP..108..851S}{{Stetson} 1996}]'),
+    [(r'\citep{1996PASP..108..851S}',
+      r'[\href{http://adsabs.harvard.edu/abs/'
+      r'1996PASP..108..851S}{{Stetson} 1996}]'),
      # Basic citep command, multi author
-     ('\citep{2017ApJ...838....5L}',
-      '[\href{http://adsabs.harvard.edu/abs/'
-      '2017ApJ...838....5L}{{Leistedt} et al 2017}]'),
+     (r'\citep{2017ApJ...838....5L}',
+      r'[\href{http://adsabs.harvard.edu/abs/'
+      r'2017ApJ...838....5L}{{Leistedt} et al 2017}]'),
      # Basic citep command, multi author
-     ('\citep{1996PASP..108..851S, 2017ApJ...838....5L}',
-      '[\href{http://adsabs.harvard.edu/abs/'
-      '1996PASP..108..851S}{{Stetson} 1996}, '
-      '\href{http://adsabs.harvard.edu/abs/'
-      '2017ApJ...838....5L}{{Leistedt} et al 2017}]')])
+     (r'\citep{1996PASP..108..851S, 2017ApJ...838....5L}',
+      r'[\href{http://adsabs.harvard.edu/abs/'
+      r'1996PASP..108..851S}{{Stetson} 1996}, '
+      r'\href{http://adsabs.harvard.edu/abs/'
+      r'2017ApJ...838....5L}{{Leistedt} et al 2017}]')])
 def test_citep(sample, expected):
     db = get_bibliography()
     replace_citep = CitepLinker(bibtex_database=db)
