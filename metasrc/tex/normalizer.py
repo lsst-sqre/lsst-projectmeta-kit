@@ -174,21 +174,9 @@ def replace_macros(tex_source, macros):
     """
     logger = logging.getLogger(__name__)
     for macro_name, macro_content in macros.items():
-        # '\' prefix is needed to escape and match the '\' in the macro name.
-        # '\\?' suffix matches an optional trailing '\' that might be used
-        # for spacing.
-        # pattern = '\\' + macro_name + '\\\\?'
         pattern = re.escape(macro_name) + r"\\?"
-        # macro_content = re.escape(macro_content)
-        logger.debug('replacing macro %r', pattern)
-        print('replacing macro %r' % pattern)
-        print('macro_content %r' % macro_content)
-        # tex_source = re.sub(pattern, macro_content, tex_source)
+        logger.debug('replacing macro %r with %s', pattern, macro_content)
+        # Use lambda for replacement so escapes in macro_content aren't
+        # processed.
         tex_source = re.sub(pattern, lambda x: macro_content, tex_source)
     return tex_source
-
-
-if __name__ == '__main__':
-    macros = {r'\product': 'Data Management'}
-    sample = r'\title    [Test Plan]  { \product\ Test Plan}'
-    print(replace_macros(sample, macros))
