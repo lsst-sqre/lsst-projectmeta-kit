@@ -137,7 +137,7 @@ def process_inputs(tex_source, root_dir=None):
 
 
 def replace_macros(tex_source, macros):
-    """Replace macros in the TeX source with their content.
+    r"""Replace macros in the TeX source with their content.
 
     Parameters
     ----------
@@ -167,8 +167,8 @@ def replace_macros(tex_source, macros):
     Any trailing slash after the macro command is also replaced by this
     function.
 
-    >>> macros = {'\\product': 'Data Management'}
-    >>> sample = '\\title    [Test Plan]  { \\product\\ Test Plan}'
+    >>> macros = {r'\product': 'Data Management'}
+    >>> sample = r'\title    [Test Plan]  { \product\ Test Plan}'
     >>> replace_macros(sample, macros)
     '\\title    [Test Plan]  { Data Management Test Plan}'
     """
