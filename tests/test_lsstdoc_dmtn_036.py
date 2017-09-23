@@ -103,3 +103,8 @@ def lsstdoc():
 @pytest.mark.parametrize('attribute,expected', ATTRIBUTES)
 def test_attribute(lsstdoc, attribute, expected):
     assert getattr(lsstdoc, attribute) == expected
+
+
+if __name__ == '__main__':
+    tex_path = os.path.join(os.path.dirname(__file__), 'data', 'DMTN-036.tex')
+    doc = LsstDoc.read(tex_path)
