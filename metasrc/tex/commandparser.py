@@ -189,13 +189,13 @@ class LatexCommand(object):
 
     @staticmethod
     def _parse_whitespace_argument(source, name):
-        """Attempt to parse a single token on the first line of this source.
+        r"""Attempt to parse a single token on the first line of this source.
 
         This method is used for parsing whitespace-delimited arguments, like
         ``\input file``. The source should ideally contain `` file`` along
         with a newline character.
 
-        >>> source = 'Line 1\\n\input test.tex\\nLine 2'
+        >>> source = 'Line 1\n' r'\input test.tex' '\nLine 2'
         >>> LatexCommand._parse_whitespace_argument(source, 'input')
         'test.tex'
 
