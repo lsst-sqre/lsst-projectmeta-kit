@@ -93,15 +93,23 @@ class CitedsLinker(BaseCommandLinker):
     \href{https://ls.st/LDM-151}{Pipelines Design}
     """
 
+    parens = ('', '')
+    """Parentheses characters."""
+
+    command_name = 'citeds'
+    """Name of LaTeX command."""
+
     def __init__(self, bibtex_database=None):
         super().__init__()
         self._db = bibtex_database
         self.command = LatexCommand(
-            'citeds',
+            self.command_name,
             {'bracket': '[', 'required': False, 'name': 'title'},
             {'bracket': '{', 'required': True, 'name': 'citekey'}
         )
-        self.template = r'\href{{{url}}}{{{content}}}'
+        self.template = (
+            self.parens[0] + r'\href{{{url}}}{{{content}}}' + self.parens[1]
+        )
 
     def _replace_command(self, tex_source, parsed):
         if 'title' in parsed:
@@ -121,47 +129,26 @@ class CitedsLinker(BaseCommandLinker):
         return tex_source
 
 
-class CitedspLinker(BaseCommandLinker):
-    """Replace a ``\citedsp`` citation with ``\href`` command.
+class CitedspLinker(CitedsLinker):
+    r"""Replace a ``\citedsp`` citation with ``\href`` command.
 
     Examples
     --------
     >>> replace_citedsp = CitedspLinker()
-    >>> print(replace_citedsp('\citedsp{LDM-151}'))
+    >>> print(replace_citedsp(r'\citedsp{LDM-151}'))
     [\href{https://ls.st/LDM-151}{LDM-151}]
 
     Variant with defined title text:
 
-    >>> print(replace_citedsp('\citedsp[Pipelines Design]{LDM-151}'))
+    >>> print(replace_citedsp(r'\citedsp[Pipelines Design]{LDM-151}'))
     [\href{https://ls.st/LDM-151}{Pipelines Design}]
     """
 
-    def __init__(self, bibtex_database=None):
-        super().__init__()
-        self._db = bibtex_database
-        self.command = LatexCommand(
-            'citedsp',
-            {'bracket': '[', 'required': False, 'name': 'title'},
-            {'bracket': '{', 'required': True, 'name': 'citekey'}
-        )
-        self.template = r'[\href{{{url}}}{{{content}}}]'
+    parens = ('[', ']')
+    """Parentheses characters."""
 
-    def _replace_command(self, tex_source, parsed):
-        if 'title' in parsed:
-            content = parsed['title']
-        else:
-            # The document handle
-            # Could get this from BibTeX
-            content = parsed['citekey']
-
-        url = 'https://ls.st/{citekey}'.format(citekey=parsed['citekey'])
-
-        href_command = self.template.format(url=url, content=content)
-        tex_source = tex_source.replace(
-            parsed.command_source,
-            href_command)
-
-        return tex_source
+    command_name = 'citedsp'
+    """Name of LaTeX command."""
 
 
 class CitepLinker(BaseCommandLinker):
