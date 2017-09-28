@@ -173,9 +173,9 @@ def replace_macros(tex_source, macros):
     '\\title    [Test Plan]  { Data Management Test Plan}'
     """
     for macro_name, macro_content in macros.items():
-        # '\' prefix is needed to escape and match the '\' in the macro name.
         # '\\?' suffix matches an optional trailing '\' that might be used
         # for spacing.
-        pattern = '\\' + macro_name + '\\\\?'
-        tex_source = re.sub(pattern, macro_content, tex_source)
+        pattern = re.escape(macro_name) + r"\\?"
+        # Wrap macro_content in lambda to avoid processing escapes
+        tex_source = re.sub(pattern, lambda _: macro_content, tex_source)
     return tex_source
