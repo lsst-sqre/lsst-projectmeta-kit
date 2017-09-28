@@ -8,7 +8,7 @@ from .lsstbib import (
 
 
 class CitationLinker(object):
-    """LaTeX source processor that converts citation commands to ``\href``
+    r"""LaTeX source processor that converts citation commands to ``\href``
     commands.
 
     This processing is useful for decoupling BibTeX from extracted TeX source
@@ -31,7 +31,7 @@ class CitationLinker(object):
         self._linkers = [cls(self._db) for cls in self._linker_classes]
 
     def __call__(self, tex_source):
-        """Convert citations in LaTeX source to Hyperref links.
+        r"""Convert citations in LaTeX source to Hyperref links.
 
         Parameters
         ----------
@@ -55,7 +55,7 @@ class BaseCommandLinker(object):
     """
 
     def __call__(self, tex_source):
-        """Convert commands of type ``command`` in LaTeX source to Hyperref
+        r"""Convert commands of type ``command`` in LaTeX source to Hyperref
         links.
 
         Parameters
@@ -79,17 +79,17 @@ class BaseCommandLinker(object):
 
 
 class CitedsLinker(BaseCommandLinker):
-    """Replace a ``\citeds`` citation with ``\href`` command.
+    r"""Replace a ``\citeds`` citation with ``\href`` command.
 
     Examples
     --------
     >>> replace_citeds = CitedsLinker()
-    >>> print(replace_citeds('\citeds{LDM-151}'))
+    >>> print(replace_citeds(r'\citeds{LDM-151}'))
     \href{https://ls.st/LDM-151}{LDM-151}
 
     Variant with defined title text:
 
-    >>> print(replace_citeds('\citeds[Pipelines Design]{LDM-151}'))
+    >>> print(replace_citeds(r'\citeds[Pipelines Design]{LDM-151}'))
     \href{https://ls.st/LDM-151}{Pipelines Design}
     """
 
@@ -101,7 +101,7 @@ class CitedsLinker(BaseCommandLinker):
             {'bracket': '[', 'required': False, 'name': 'title'},
             {'bracket': '{', 'required': True, 'name': 'citekey'}
         )
-        self.template = '\\href{{{url}}}{{{content}}}'
+        self.template = r'\href{{{url}}}{{{content}}}'
 
     def _replace_command(self, tex_source, parsed):
         if 'title' in parsed:
@@ -144,7 +144,7 @@ class CitedspLinker(BaseCommandLinker):
             {'bracket': '[', 'required': False, 'name': 'title'},
             {'bracket': '{', 'required': True, 'name': 'citekey'}
         )
-        self.template = '[\\href{{{url}}}{{{content}}}]'
+        self.template = r'[\href{{{url}}}{{{content}}}]'
 
     def _replace_command(self, tex_source, parsed):
         if 'title' in parsed:
@@ -206,7 +206,7 @@ class CitepLinker(BaseCommandLinker):
             {'bracket': '{', 'required': True, 'name': 'citekeys'}
         )
         self.outer_template = "[{content}]"
-        self.link_template = "\\href{{{url}}}{{{content}}}"
+        self.link_template = r"\href{{{url}}}{{{content}}}"
 
     def _replace_command(self, tex_source, parsed):
         cite_keys = [k.strip() for k in parsed['citekeys'].split(',')]

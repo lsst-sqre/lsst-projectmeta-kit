@@ -58,7 +58,7 @@ def remove_trailing_whitespace(tex_source):
 
 
 def read_tex_file(root_filepath, root_dir=None):
-    """Read a TeX file, automatically processing and normalizing it
+    r"""Read a TeX file, automatically processing and normalizing it
     (including other input files, removing comments, and deleting trailing
     whitespace).
 
@@ -90,7 +90,7 @@ def read_tex_file(root_filepath, root_dir=None):
 
 
 def process_inputs(tex_source, root_dir=None):
-    """Insert referenced TeX file contents (from  ``\input`` and ``\include``
+    r"""Insert referenced TeX file contents (from  ``\input`` and ``\include``
     commands) into the source.
 
     Parameters
@@ -137,7 +137,7 @@ def process_inputs(tex_source, root_dir=None):
 
 
 def replace_macros(tex_source, macros):
-    """Replace macros in the TeX source with their content.
+    r"""Replace macros in the TeX source with their content.
 
     Parameters
     ----------
@@ -167,8 +167,8 @@ def replace_macros(tex_source, macros):
     Any trailing slash after the macro command is also replaced by this
     function.
 
-    >>> macros = {'\\product': 'Data Management'}
-    >>> sample = '\\title    [Test Plan]  { \\product\\ Test Plan}'
+    >>> macros = {r'\product': 'Data Management'}
+    >>> sample = r'\title    [Test Plan]  { \product\ Test Plan}'
     >>> replace_macros(sample, macros)
     '\\title    [Test Plan]  { Data Management Test Plan}'
     """

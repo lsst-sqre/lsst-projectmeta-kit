@@ -414,7 +414,7 @@ class LsstDoc(object):
             self._serial = None
 
     def _parse_author(self):
-        """Parse the author from TeX source.
+        r"""Parse the author from TeX source.
 
         Sets the ``_authors`` attribute.
 
@@ -502,12 +502,12 @@ class LsstDoc(object):
         return latex_text
 
     def _load_bib_db(self):
-        """Load the BibTeX bibliography referenced by the document.
+        r"""Load the BibTeX bibliography referenced by the document.
 
         This method triggered by the `bib_db` attribute and populates the
         `_bib_db` private attribute.
 
-        The ``\\bibliography`` command is parsed to identify the bibliographies
+        The ``\bibliography`` command is parsed to identify the bibliographies
         referenced by the document.
         """
         # Get the names of custom bibtex files by parsing the
