@@ -182,10 +182,10 @@ def test_get_authoryear():
     )
     db = parse_string(bibtex, 'bibtex')
     entry = db.entries['LDM-151']
-    expected = 'Swinbank et al 2017'
+    expected = 'Swinbank and others 2017'
     assert get_authoryear_from_entry(entry) == expected
 
-    expected = 'Swinbank et al (2017)'
+    expected = 'Swinbank and others (2017)'
     assert get_authoryear_from_entry(entry, paren=True) == expected
 
 

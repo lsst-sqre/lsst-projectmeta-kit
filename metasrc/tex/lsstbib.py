@@ -234,35 +234,46 @@ def get_authoryear_from_entry(entry, paren=False):
     authoryear : `str`
         The author-year citation text.
     """
-    multi_author = False
     if len(entry.persons['author']) > 0:
-        # Grab first author
-        person = entry.persons['author'][0]
-        if len(entry.persons['author']) > 1:
-            multi_author = True
+        # Grab author list
+        persons = entry.persons['author']
     elif len(entry.persons['editor']) > 0:
-        # Grab first editor
-        person = entry.persons['editor'][0]
-        if len(entry.persons['editor']) > 1:
-            multi_author = True
+        # Grab editor list
+        persons = entry.persons['editor']
     else:
-        raise AuthorYearError(RuntimeError)
+        raise AuthorYearError
 
     try:
         year = entry.fields['year']
     except KeyError:
         raise AuthorYearError
 
-    if paren and not multi_author:
+    if paren and len(persons) == 1:
         template = '{author} ({year})'
-    elif not paren and not multi_author:
+        return template.format(author=' '.join(persons[0].last_names),
+                               year=year)
+    elif not paren and len(persons) == 1:
         template = '{author} {year}'
-    elif paren and multi_author:
-        template = '{author} et al ({year})'
-    elif not paren and multi_author:
+        return template.format(author=' '.join(persons[0].last_names),
+                               year=year)
+    elif paren and len(persons) == 2:
+        template = '{author1} and {author2} ({year})'
+        return template.format(author1=' '.join(persons[0].last_names),
+                               author2=' '.join(persons[1].last_names),
+                               year=year)
+    elif not paren and len(persons) == 2:
+        template = '{author1} and {author2} {year}'
+        return template.format(author1=' '.join(persons[0].last_names),
+                               author2=' '.join(persons[1].last_names),
+                               year=year)
+    elif not paren and len(persons) > 2:
         template = '{author} et al {year}'
-    return template.format(author=' '.join(person.last_names),
-                           year=year)
+        return template.format(author=' '.join(persons[0].last_names),
+                               year=year)
+    elif paren and len(persons) > 2:
+        template = '{author} et al ({year})'
+        return template.format(author=' '.join(persons[0].last_names),
+                               year=year)
 
 
 class AuthorYearError(RuntimeError):

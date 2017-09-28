@@ -49,13 +49,13 @@ def test_citedsp(sample, expected):
      # Basic citep command, multi author
      ('\citep{2017ApJ...838....5L}',
       '[\href{http://adsabs.harvard.edu/abs/'
-      '2017ApJ...838....5L}{{Leistedt} et al 2017}]'),
+      '2017ApJ...838....5L}{{Leistedt} and {Hogg} 2017}]'),
      # Basic citep command, multi author
      ('\citep{1996PASP..108..851S, 2017ApJ...838....5L}',
       '[\href{http://adsabs.harvard.edu/abs/'
       '1996PASP..108..851S}{{Stetson} 1996}, '
       '\href{http://adsabs.harvard.edu/abs/'
-      '2017ApJ...838....5L}{{Leistedt} et al 2017}]')])
+      '2017ApJ...838....5L}{{Leistedt} and {Hogg} 2017}]')])
 def test_citep(sample, expected):
     db = get_bibliography()
     replace_citep = CitepLinker(bibtex_database=db)

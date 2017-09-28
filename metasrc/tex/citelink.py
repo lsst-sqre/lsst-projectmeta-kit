@@ -180,7 +180,7 @@ class CitepLinker(BaseCommandLinker):
     >>> link_citep = CitepLinker(bib_db)
     >>> sample_text = r"\citep{2001ApJ...550..212B}"
     >>> print(link_citep(sample_text))  # doctest: +ELLIPSIS
-    [\href{http://adsabs.harvard.edu/abs/2001ApJ...}{{Bell} et al 2001}]
+    [\href{http://adsabs.harvard.edu/abs/2001Ap...}{{Bell} and {de Jong} 2001}]
     """
 
     def __init__(self, bibtex_database=None):
