@@ -3,6 +3,6 @@
 -e .
 
 # Development/testing dependencies
-pytest==3.0.7
+pytest==3.2.2
 pytest-cov==2.5.0
 pytest-flake8==0.8.1
