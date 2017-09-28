@@ -58,8 +58,30 @@ def test_no_short_title():
     """Test parsing the title command for a trivial source sample that
     doesn't include a short title.
     """
-    sample = (r"Hello world\n\title{Title}\nFin\n"
-              r"\setDocRef{LDM-nnn}\n")
+    sample = ("Hello world\n\\title{Title}\nFin\n"
+              "\setDocRef{LDM-nnn}\n")
+    elements = [
+        {'name': 'short_title', 'required': False, 'bracket': '['},
+        {'name': 'long_title', 'required': True, 'bracket': '{'}
+    ]
+    command = LatexCommand('title', *elements)
+    parsed = next(command.parse(sample))
+
+    assert parsed['long_title'] == 'Title'
+    with pytest.raises(KeyError):
+        parsed['short_title']
+
+    assert 'short_title' not in parsed
+    assert 'long_title' in parsed
+
+
+def test_no_short_title_v2():
+    """Test parsing the title command for a trivial source sample that
+    doesn't include a short title, but where the [..]{..} does occur
+    elsewhere.
+    """
+    sample = ("Hello world\n\\title{Title}\nFin\n"
+              "\setDocRef[Trap]{LDM-nnn}\n")
     elements = [
         {'name': 'short_title', 'required': False, 'bracket': '['},
         {'name': 'long_title', 'required': True, 'bracket': '{'}
@@ -87,3 +109,16 @@ def test_command_regex(command, sample):
     command_regex = LatexCommand._make_command_regex(command)
     matches = re.findall(command_regex, sample)
     assert len(matches) == 1
+
+
+def test_optional_bracket():
+    """Test parsing a command where the sole token has no brackets around it.
+    """
+    sample = "Hello.\n\n\input test.tex\n\nMore content."
+
+    command = LatexCommand(
+        'input',
+        {'name': 'filename', 'required': True, 'bracket': '{'}
+    )
+    parsed = next(command.parse(sample))
+    assert parsed['filename'] == 'test.tex'

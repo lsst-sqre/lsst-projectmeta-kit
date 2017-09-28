@@ -8,13 +8,13 @@ import re
 
 
 class LatexCommand(object):
-    """Definition of a LaTeX command's syntax that is used for parsing that
+    r"""Definition of a LaTeX command's syntax that is used for parsing that
     command's content from a LaTeX source document.
 
     Parameters
     ----------
     name : `str`
-        Name of the LaTeX command. For example, the name of the ``'\\title'``
+        Name of the LaTeX command. For example, the name of the ``'\title'``
         command is ``'title'`` (without the backslash prefix).
     *elements : `dict`
         Each position element is a dictionary describing that element of the
@@ -23,7 +23,7 @@ class LatexCommand(object):
 
         The keys of each dictionary are:
 
-        - ``backet``: The element's bracket style. Can be ``'['`` or ``'{'``.
+        - ``bracket``: The element's bracket style. Can be ``'['`` or ``'{'``.
         - ``required`` (optional field): `False` if the field is optional.
           `True` if required. Default is `True`.
         - ``name`` (optional field): Name of the field.
@@ -65,11 +65,11 @@ class LatexCommand(object):
 
     @staticmethod
     def _make_command_regex(name):
-        """Given a command name, build a regular expression to detect that
+        r"""Given a command name, build a regular expression to detect that
         command in TeX source.
 
-        The regular expression is designed to discern "\\title{..}" from
-        "\\titlename{..}". It does this by ensuring that the command is
+        The regular expression is designed to discern "\title{..}" from
+        "\titlename{..}". It does this by ensuring that the command is
         followed by a whitespace character, argument brackets, or a comment
         character.
 
@@ -83,7 +83,7 @@ class LatexCommand(object):
         regex : `str`
             Regular expression pattern for detecting the command.
         """
-        return '\\\\' + name + '(?:[\s{[%])'
+        return r'\\' + name + r'(?:[\s{[%])'
 
     def _parse_command(self, source, start_index):
         """Parse a single command.
@@ -116,6 +116,24 @@ class LatexCommand(object):
                 if c == element['bracket']:
                     element_start = i
                     break
+                elif c == '\n':
+                    # No starting bracket on the line.
+                    if element['required'] is True:
+                        # Try to parse a single single-word token after the
+                        # command, like '\input file'
+                        content = self._parse_whitespace_argument(
+                            source[running_index:],
+                            self.name)
+                        return ParsedCommand(
+                            self.name,
+                            [{'index': element['index'],
+                              'name': element['name'],
+                              'content': content.strip()}],
+                            start_index,
+                            source[start_index:i])
+                    else:
+                        # Give up on finding an optional element
+                        break
 
             # Handle cases when the opening bracket is never found.
             if element_start is None and element['required'] is False:
@@ -131,7 +149,7 @@ class LatexCommand(object):
                 raise CommandParserError(message)
 
             # Find the closing bracket, keeping track of the number of times
-            # the same type of bracket was opening and closed.
+            # the same type of bracket was opened and closed.
             balance = 1
             for i, c in enumerate(source[element_start + 1:],
                                   start=element_start + 1):
@@ -164,21 +182,56 @@ class LatexCommand(object):
 
             running_index = element_end + 1
 
-        parsed_command = ParsedCommand(self.name, start_index, parsed_elements,
-                                       source)
+        command_source = source[start_index:running_index]
+        parsed_command = ParsedCommand(self.name, parsed_elements,
+                                       start_index, command_source)
         return parsed_command
+
+    @staticmethod
+    def _parse_whitespace_argument(source, name):
+        r"""Attempt to parse a single token on the first line of this source.
+
+        This method is used for parsing whitespace-delimited arguments, like
+        ``\input file``. The source should ideally contain `` file`` along
+        with a newline character.
+
+        >>> source = 'Line 1\n' r'\input test.tex' '\nLine 2'
+        >>> LatexCommand._parse_whitespace_argument(source, 'input')
+        'test.tex'
+
+        Bracket delimited arguments (``\input{test.tex}``) are handled in
+        the normal logic of `_parse_command`.
+        """
+        # First match the command name itself so that we find the argument
+        # *after* the command
+        command_pattern = r'\\(' + name + ')(?:[\s{[%])'
+        command_match = re.search(command_pattern, source)
+        if command_match is not None:
+            # Trim `source` so we only look after the command
+            source = source[command_match.end(1):]
+
+        # Find the whitespace-delimited argument itself.
+        pattern = r'(?P<content>\S+)(?:[ %\t\n]+)'
+        match = re.search(pattern, source)
+        if match is None:
+            message = (
+                'When parsing {}, did not find whitespace-delimited command '
+                'argument'
+            )
+            raise CommandParserError(message.format(name))
+        content = match.group('content')
+        content.strip()
+        return content
 
 
 class ParsedCommand(object):
-    """Contents of a parsed LaTeX command.
+    r"""Contents of a parsed LaTeX command.
 
     Parameters
     ----------
     name : `str`
-        Name of the LaTeX command. For example, the name of the ``'\\title'``
+        Name of the LaTeX command. For example, the name of the ``'\title'``
         command is ``'title'`` (without the backslash prefix).
-    start_index : `int`
-        Character index in the ``full_source`` where the command begins.
     parsed_elements : `list`
         Parsed command elements. Each item is a `dict` with keys:
 
@@ -187,17 +240,19 @@ class ParsedCommand(object):
         - ``name``: `str` name of the element in the `LatexCommand` command
           definition, or `None` if the element is not named.
         - ``content``: `str` content of the element (tex source).
-    full_source : `str`
-        Full source of the TeX document. Used for resolving macros in content
-        and converting content to other formats (such as HTML).
+    start_index : `int`
+        Character index in the ``full_source`` where the command begins.
+    command_source : `str`
+        The full source of the parsed LaTeX command. This can be used to
+        replace the full command in the source document.
     """
 
-    def __init__(self, name, start_index, parsed_elements, full_source):
+    def __init__(self, name, parsed_elements, start_index, command_source):
         super().__init__()
         self.name = name
         self.start_index = start_index
         self._parsed_elements = parsed_elements
-        self._full_source = full_source
+        self.command_source = command_source
 
     def __getitem__(self, key):
         element = self._get_element(key)

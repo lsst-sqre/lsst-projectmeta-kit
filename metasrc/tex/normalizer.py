@@ -1,16 +1,26 @@
 """Functions for normalizing TeX source.
 """
 
+__all__ = ['remove_comments', 'remove_trailing_whitespace', 'read_tex_file',
+           'process_inputs', 'replace_macros']
+
 import logging
 import os
 import re
 
 
-logging.getLogger(__name__).addHandler(logging.NullHandler())
-
-# Regular expressions
-input_pattern = re.compile(r'\\input{(.*?)}')
-include_pattern = re.compile(r'\\include{(.*?)}')
+# Regular expression for finding input or include commands
+input_include_pattern = re.compile(
+    r'\\(?P<command>input|include)'  # command name
+    r'[ ]*?'  # optional whitespace
+    r'{*?'  # optional opening bracket
+    r'(?P<filename>[\w/\-\.]+)'  # included filename
+    r'[\}%\s]'  # closing whitespace or bracket
+)
+input_pattern = re.compile(
+    r'\\input[ ]*?{*?(?P<filename>[\w/\-\.]+)[\}%\s]')
+include_pattern = re.compile(
+    r'\\include[ ]*?{*?(?P<filename>[\w/\-\.]+)[\}%\s]')
 
 
 def remove_comments(tex_source):
@@ -43,12 +53,12 @@ def remove_trailing_whitespace(tex_source):
     tex_source : str
         TeX source without trailing whitespace.
     """
-    # Expression via https://stackoverflow.com/a/17350806
-    return re.sub(r'\s+$', '', tex_source, flags=re.M)
+    # Delete any space or tab characters right before a new line
+    return re.sub(r'[ \t]+$', '', tex_source, flags=re.M)
 
 
 def read_tex_file(root_filepath, root_dir=None):
-    """Read a TeX file, automatically processing and normalizing it
+    r"""Read a TeX file, automatically processing and normalizing it
     (including other input files, removing comments, and deleting trailing
     whitespace).
 
@@ -80,7 +90,7 @@ def read_tex_file(root_filepath, root_dir=None):
 
 
 def process_inputs(tex_source, root_dir=None):
-    """Insert referenced TeX file contents (from  ``\input`` and ``\include``
+    r"""Insert referenced TeX file contents (from  ``\input`` and ``\include``
     commands) into the source.
 
     Parameters
@@ -107,7 +117,7 @@ def process_inputs(tex_source, root_dir=None):
 
     def _sub_line(match):
         """Function to be used with re.sub to inline files for each match."""
-        fname = match.group(1)
+        fname = match.group('filename')
         if not fname.endswith('.tex'):
             full_fname = ".".join((fname, 'tex'))
         else:
@@ -122,13 +132,12 @@ def process_inputs(tex_source, root_dir=None):
         else:
             return included_source
 
-    tex_source = input_pattern.sub(_sub_line, tex_source)
-    tex_source = include_pattern.sub(_sub_line, tex_source)
+    tex_source = input_include_pattern.sub(_sub_line, tex_source)
     return tex_source
 
 
 def replace_macros(tex_source, macros):
-    """Replace macros in the TeX source with their content.
+    r"""Replace macros in the TeX source with their content.
 
     Parameters
     ----------
@@ -158,15 +167,15 @@ def replace_macros(tex_source, macros):
     Any trailing slash after the macro command is also replaced by this
     function.
 
-    >>> macros = {'\\product': 'Data Management'}
-    >>> sample = '\\title    [Test Plan]  { \\product\\ Test Plan}'
+    >>> macros = {r'\product': 'Data Management'}
+    >>> sample = r'\title    [Test Plan]  { \product\ Test Plan}'
     >>> replace_macros(sample, macros)
     '\\title    [Test Plan]  { Data Management Test Plan}'
     """
     for macro_name, macro_content in macros.items():
-        # '\' prefix is needed to escape and match the '\' in the macro name.
         # '\\?' suffix matches an optional trailing '\' that might be used
         # for spacing.
-        pattern = '\\' + macro_name + '\\\\?'
-        tex_source = re.sub(pattern, macro_content, tex_source)
+        pattern = re.escape(macro_name) + r"\\?"
+        # Wrap macro_content in lambda to avoid processing escapes
+        tex_source = re.sub(pattern, lambda _: macro_content, tex_source)
     return tex_source

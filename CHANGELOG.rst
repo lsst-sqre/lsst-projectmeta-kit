@@ -2,6 +2,65 @@
 Change Log
 ##########
 
+0.2.0 (2017-09-28)
+==================
+
+The 0.2.0 release brings Pandoc integration for better conversions from LaTeX to HTML and plain text.
+
+Changes
+-------
+
+- Renamed ``metasrc.tex.lsstdoc.LsstDoc`` to ``metasrc.tex.lsstdoc.LsstLatexDoc``.
+- Renamed ``metasrc.tex.texnormalizer`` to ``metasrc.tex.normalizer``.
+- We now assign a ``NullHandler`` to metasrc's root logger.
+  This makes it easier for you to add your own handlers and control metasrc's logging.
+
+New
+---
+
+- New dependencies on ``pypandoc>=1.4``, ``panflute==1.10.6``, ``aiohttp>=2.25``, and ``pybtex>=0.21``.
+
+- New ``metasrc.pandoc`` namespace for working with Pandoc:
+
+  - ``metasrc.pandoc.convert.convert_text()`` and ``convert_lsstdoc_tex()`` wraps pypandoc's ``convert_text()`` function and provides extra conveniences, like running with the ``metasrc-deparagraph`` filter and ensuring that pandoc is installed.
+  - ``metasrc.pandoc.convert.ensure_pandoc()`` is a decorator that ensures Pandoc is installed before running the wrapped function.
+    If necessary, it uses pypandoc to install Pandoc.
+  - The ``metasrc-deparagraph`` CL program is a Pandoc filter, made with panflute, that removes the paragraph tags around a single paragraph of text.
+    This is useful when extracting single paragraphs or sentences (such as titles or authors).
+
+- New functionality in ``metasrc.tex.lsstdoc.LsstLatexDoc`` that improves the quality of LaTeX to HTML5 conversions:
+
+  - ``LsstLatexDoc`` now lazily parses an lsstdoc LaTeX document.
+    Content is extracted or processed when attributes are accessed.
+  - ``LsstLatexDoc.read()`` class method for reading LaTeX source, normalizing it, and creating an ``LsstLatexDoc`` instance.
+  - New ``html_*`` and ``plain_*`` attributes with content converted to the given format.
+    For example, ``html_abstract`` is the abstract converted to HTML5 with Pandoc.
+    The regular attributes, ``title``, ``abstract``, and ``authors`` provide the original LaTeX.
+  - The ``LsstLatexDoc.bib_db`` attributes provides a ``pybtex.database.BibliographyData`` instance with all BibTeX bibliography referenced by the document.
+  - The ``html_abstract`` and ``plain_abstract`` attributes pre-process the LaTeX snippet before converting with Pandoc.
+    The only pre-processing step implemented so far is the citation linker, which replaces ``\cite*`` commands with hyperlinks (``\href``).
+    This decouples the LaTeX snippet from the BibTeX database.
+
+- New ``metasrc.tex.lsstbib`` module:
+  
+  - The ``get_bibliography()`` function Lets you get a ``pybtex.database.BibliographyData`` instance that includes BibTeX from both local BibTeX files and the common lsst-texmf BibTeX files.
+    ``aiohttp`` (``asyncio``) lets us download lsst-texmf BibTeX files quickly from the ``master`` branch on GitHub.
+  - ``get_url_from_entry()`` makes it easier to get a URL to the entity described by a pybtex Entry.
+    Works with DocuShare handles, ``adsurl``, DOIs, and plain ``url`` fields.
+  - ``get_authoryear_from_entry()`` creates natbib-like in-text citations from a pybtex Entry.
+    For example, "Sick et al (2017)."
+
+- New ``metasrc.tex.citelink`` module.
+  The ``CitationLinker`` class processes LaTeX source and replaces citation commands with hyperlinks to decouple a LaTeX snippet from a BibTeX database.
+  This is useful for Pandoc conversions to HTML.
+  These commands are currently converted:
+
+  - ``\citeds``
+  - ``\citedsp``
+  - ``\citep``
+
+- Fixed warnings related to unintended escapes when using ``re.sub``.
+
 0.1.4 (2017-09-07)
 ==================
 

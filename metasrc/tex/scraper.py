@@ -16,7 +16,7 @@ DEF_PATTERN = re.compile(
 
 
 def get_macros(tex_source):
-    """Get all macro definitions from TeX source, supporting multiple
+    r"""Get all macro definitions from TeX source, supporting multiple
     declaration patterns.
 
     Parameters
@@ -50,7 +50,7 @@ def get_macros(tex_source):
 
 
 def get_def_macros(tex_source):
-    """Get all ``\def`` macro definition from TeX source.
+    r"""Get all ``\def`` macro definition from TeX source.
 
     Parameters
     ----------

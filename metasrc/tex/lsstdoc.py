@@ -1,97 +1,347 @@
 """Metadata extraction from lsstdoc LSST LaTeX documents."""
 
-__all__ = ['LsstDoc']
+__all__ = ['LsstLatexDoc']
+
+import logging
+import os
 
 from .commandparser import LatexCommand
+from ..pandoc.convert import convert_lsstdoc_tex
+from .scraper import get_macros
+from .normalizer import read_tex_file, replace_macros
+from .lsstbib import get_bibliography, KNOWN_LSSTTEXMF_BIB_NAMES
+from .citelink import CitationLinker
 
 
-class LsstDoc(object):
-    """lsstdoc LaTeX document source.
+class LsstLatexDoc(object):
+    """An lsstdoc-class LaTeX document with metadata access.
 
     Parameters
     ----------
     tex_source : `str`
         LaTeX source for the main file of an lsstdoc LaTeX document.
+    root_dir : `str`, optional
+        Root directory of the LaTeX project. `None` is treated as the
+        current working directory.
     """
 
-    def __init__(self, tex_source):
+    def __init__(self, tex_source, root_dir=None):
         super().__init__()
-        self._tex = tex_source
+        self._logger = logging.getLogger(__name__)
 
-        self._parse_documentclass()
-        self._parse_title()
-        self._parse_author()
-        self._parse_abstract()
-        self._parse_doc_ref()
+        # The BibliographyData (parsed BibTeX) is only loaded when
+        # the self.bib_db attributed is first accessed.
+        self._bib_db = None
+
+        self._tex = tex_source
+        if root_dir is None:
+            self._root_dir = ''
+        else:
+            self._root_dir = root_dir
+
+    @classmethod
+    def read(cls, root_tex_path):
+        """Construct an `LsstLatexDoc` instance by reading and parsing the
+        LaTeX source.
+
+        Parameters
+        ----------
+        root_tex_path : `str`
+            Path to the LaTeX source on the filesystem. For multi-file LaTeX
+            projects this should be the path to the root document.
+
+        Notes
+        -----
+        This method implements the following pipeline:
+
+        1. `metasrc.tex.normalizer.read_tex_file`
+        2. `metasrc.tex.scraper.get_macros`
+        3. `metasrc.tex.normalizer.replace_macros`
+
+        Thus ``input`` and ``includes`` are resolved along with simple macros.
+        """
+        # Read and normalize the TeX source, replacing macros with content
+        root_dir = os.path.dirname(root_tex_path)
+        tex_source = read_tex_file(root_tex_path)
+        tex_macros = get_macros(tex_source)
+        tex_source = replace_macros(tex_source, tex_macros)
+        return cls(tex_source, root_dir=root_dir)
+
+    @property
+    def html_title(self):
+        """HTML5-formatted document title (`str`)."""
+        return self.format_title(format='html5', deparagraph=True,
+                                 mathjax=False, smart=True)
+
+    @property
+    def plain_title(self):
+        """Plain-text-formatted document title (`str`)."""
+        return self.format_title(format='plain', deparagraph=True,
+                                 mathjax=False, smart=True)
 
     @property
     def title(self):
-        """Document title (`str`)."""
-        if hasattr(self, '_title'):
-            return self._title
-        else:
-            return None
+        """LaTeX-formatted document title (`str`)."""
+        if not hasattr(self, '_title'):
+            self._parse_title()
+
+        return self._title
+
+    @property
+    def html_short_title(self):
+        """HTML5-formatted document short title (`str`)."""
+        return self.format_short_title(format='html5', deparagraph=True,
+                                       mathjax=False, smart=True)
+
+    @property
+    def plain_short_title(self):
+        """Plaintext-formatted document short title (`str`)."""
+        return self.format_short_title(format='plain', deparagraph=True,
+                                       mathjax=False, smart=True)
 
     @property
     def short_title(self):
-        """Document short title (`str`)."""
-        if hasattr(self, '_short_title'):
-            return self._short_title
-        else:
-            return None
+        """LaTeX-formatted document short title (`str`)."""
+        if not hasattr(self, '_short_title'):
+            self._parse_title()
+
+        return self._short_title
+
+    @property
+    def html_authors(self):
+        """HTML5-formatted authors (`list` of `str`)."""
+        return self.format_authors(format='html5', deparagraph=True,
+                                   mathjax=False, smart=True)
+
+    @property
+    def plain_authors(self):
+        """Plaintext-formatted authors (`list` of `str`)."""
+        return self.format_authors(format='plain', deparagraph=True,
+                                   mathjax=False, smart=True)
 
     @property
     def authors(self):
-        """Authors (`list` of `str`)."""
-        if hasattr(self, '_authors'):
-            return self._authors
-        else:
-            return []
+        """LaTeX-formatted authors (`list` of `str`)."""
+        if not hasattr(self, '_authors'):
+            self._parse_author()
+
+        return self._authors
+
+    @property
+    def html_abstract(self):
+        """HTML5-formatted document abstract (`str`)."""
+        return self.format_abstract(format='html5', deparagraph=False,
+                                    mathjax=False, smart=True)
+
+    @property
+    def plain_abstract(self):
+        """Plaintext-formatted document abstract (`str`)."""
+        return self.format_abstract(format='plain', deparagraph=False,
+                                    mathjax=False, smart=True)
 
     @property
     def abstract(self):
-        """Abstract (`str`)."""
-        if hasattr(self, '_abstract'):
-            return self._abstract
-        else:
-            return None
+        """LaTeX-formatted abstract (`str`)."""
+        if not hasattr(self, '_abstract'):
+            self._parse_abstract()
+
+        return self._abstract
 
     @property
     def handle(self):
-        """Document handle (`str`)."""
-        if hasattr(self, '_handle'):
-            return self._handle
-        else:
-            return None
+        """LaTeX-formatted document handle (`str`)."""
+        if not hasattr(self, '_handle'):
+            self._parse_doc_ref()
+
+        return self._handle
 
     @property
     def series(self):
-        """Document series (`str`)."""
-        if hasattr(self, '_series'):
-            return self._series
-        else:
-            return None
+        """Document series identifier (`str`)."""
+        if not hasattr(self, '_series'):
+            self._parse_doc_ref()
+
+        return self._series
 
     @property
     def serial(self):
         """Document serial number within series (`str`)."""
-        if hasattr(self, '_serial'):
-            return self._serial
-        else:
-            return None
+        if not hasattr(self, '_serial'):
+            self._parse_doc_ref()
+
+        return self._serial
 
     @property
     def is_draft(self):
         """Document is a draft if ``'lsstdoc'`` is included in the
         documentclass options (`bool`).
         """
-        if hasattr(self, '_document_options'):
-            if 'lsstdraft' in self._document_options:
-                return True
-        return False
+        if not hasattr(self, '_document_options'):
+            self._parse_documentclass()
+
+        if 'lsstdraft' in self._document_options:
+            return True
+        else:
+            return False
+
+    @property
+    def bib_db(self):
+        """Bibliography database referenced by the document
+        (`pybtex.database.BibliographyData`).
+        """
+        if self._bib_db is None:
+            # Load reference BibTeX into a pybtex BibliographyData
+            self._load_bib_db()
+        return self._bib_db
+
+    def format_title(self, format='html5', deparagraph=True, mathjax=False,
+                     smart=True, extra_args=None):
+        """Get the document title in the specified markup format.
+
+        Parameters
+        ----------
+        format : `str`, optional
+            Output format (such as ``'html5'`` or ``'plain'``).
+        deparagraph : `bool`, optional
+            Remove the paragraph tags from single paragraph content.
+        mathjax : `bool`, optional
+            Allow pandoc to use MathJax math markup.
+        smart : `True`, optional
+            Allow pandoc to create "smart" unicode punctuation.
+        extra_args : `list`, optional
+            Additional command line flags to pass to Pandoc. See
+            `metasrc.pandoc.convert.convert_text`.
+
+        Returns
+        -------
+        output_text : `str`
+            Converted content or `None` if the title is not available in
+            the document.
+        """
+        if self.title is None:
+            return None
+
+        output_text = convert_lsstdoc_tex(
+            self.title, format,
+            deparagraph=deparagraph,
+            mathjax=mathjax,
+            smart=smart,
+            extra_args=extra_args)
+        return output_text
+
+    def format_short_title(self, format='html5', deparagraph=True,
+                           mathjax=False, smart=True, extra_args=None):
+        """Get the document short title in the specified markup format.
+
+        Parameters
+        ----------
+        format : `str`, optional
+            Output format (such as ``'html5'`` or ``'plain'``).
+        deparagraph : `bool`, optional
+            Remove the paragraph tags from single paragraph content.
+        mathjax : `bool`, optional
+            Allow pandoc to use MathJax math markup.
+        smart : `True`, optional
+            Allow pandoc to create "smart" unicode punctuation.
+        extra_args : `list`, optional
+            Additional command line flags to pass to Pandoc. See
+            `metasrc.pandoc.convert.convert_text`.
+
+        Returns
+        -------
+        output_text : `str`
+            Converted content or `None` if the short title is not available in
+            the document.
+        """
+        if self.short_title is None:
+            return None
+
+        output_text = convert_lsstdoc_tex(
+            self.short_title, 'html5',
+            deparagraph=deparagraph,
+            mathjax=mathjax,
+            smart=smart,
+            extra_args=extra_args)
+        return output_text
+
+    def format_abstract(self, format='html5', deparagraph=False, mathjax=False,
+                        smart=True, extra_args=None):
+        """Get the document abstract in the specified markup format.
+
+        Parameters
+        ----------
+        format : `str`, optional
+            Output format (such as ``'html5'`` or ``'plain'``).
+        deparagraph : `bool`, optional
+            Remove the paragraph tags from single paragraph content.
+        mathjax : `bool`, optional
+            Allow pandoc to use MathJax math markup.
+        smart : `True`, optional
+            Allow pandoc to create "smart" unicode punctuation.
+        extra_args : `list`, optional
+            Additional command line flags to pass to Pandoc. See
+            `metasrc.pandoc.convert.convert_text`.
+
+        Returns
+        -------
+        output_text : `str`
+            Converted content or `None` if the title is not available in
+            the document.
+        """
+        if self.abstract is None:
+            return None
+
+        abstract_latex = self._prep_snippet_for_pandoc(self.abstract)
+
+        output_text = convert_lsstdoc_tex(
+            abstract_latex, format,
+            deparagraph=deparagraph,
+            mathjax=mathjax,
+            smart=smart,
+            extra_args=extra_args)
+        return output_text
+
+    def format_authors(self, format='html5', deparagraph=True, mathjax=False,
+                       smart=True, extra_args=None):
+        """Get the document authors in the specified markup format.
+
+        Parameters
+        ----------
+        format : `str`, optional
+            Output format (such as ``'html5'`` or ``'plain'``).
+        deparagraph : `bool`, optional
+            Remove the paragraph tags from single paragraph content.
+        mathjax : `bool`, optional
+            Allow pandoc to use MathJax math markup.
+        smart : `True`, optional
+            Allow pandoc to create "smart" unicode punctuation.
+        extra_args : `list`, optional
+            Additional command line flags to pass to Pandoc. See
+            `metasrc.pandoc.convert.convert_text`.
+
+        Returns
+        -------
+        output_text : `list` of `str`
+            Sequence of author names in the specified output markup format.
+        """
+        formatted_authors = []
+        for latex_author in self.authors:
+            formatted_author = convert_lsstdoc_tex(
+                latex_author, format,
+                deparagraph=deparagraph,
+                mathjax=mathjax,
+                smart=smart,
+                extra_args=extra_args)
+            # removes Pandoc's terminal newlines
+            formatted_author = formatted_author.strip()
+            formatted_authors.append(formatted_author)
+        return formatted_authors
 
     def _parse_documentclass(self):
-        """Parse documentclass options."""
+        """Parse documentclass options.
+
+        Sets the the ``_document_options`` attribute.
+        """
         command = LatexCommand(
             'documentclass',
             {'name': 'options', 'required': False, 'bracket': '['},
@@ -99,17 +349,25 @@ class LsstDoc(object):
         try:
             parsed = next(command.parse(self._tex))
         except StopIteration:
-            return
+            self._logger.warning('lsstdoc has no documentclass')
+            self._document_options = []
 
         try:
             content = parsed['options']
             self._document_options = [opt.strip()
                                       for opt in content.split(',')]
         except KeyError:
-            pass
+            self._logger.warning('lsstdoc has no documentclass options')
+            self._document_options = []
 
     def _parse_title(self):
-        """Parse the title from TeX source."""
+        """Parse the title from TeX source.
+
+        Sets these attributes:
+
+        - ``_title``
+        - ``_short_title``
+        """
         command = LatexCommand(
             'title',
             {'name': 'short_title', 'required': False, 'bracket': '['},
@@ -117,30 +375,48 @@ class LsstDoc(object):
         try:
             parsed = next(command.parse(self._tex))
         except StopIteration:
-            return
+            self._logger.warning('lsstdoc has no title')
+            self._title = None
+            self._short_title = None
 
         self._title = parsed['long_title']
 
         try:
             self._short_title = parsed['short_title']
         except KeyError:
-            pass
+            self._logger.warning('lsstdoc has no short title')
+            self._short_title = None
 
     def _parse_doc_ref(self):
-        """Parse the document handle."""
+        """Parse the document handle.
+
+        Sets the ``_series``, ``_serial``, and ``_handle`` attributes.
+        """
         command = LatexCommand(
             'setDocRef',
             {'name': 'handle', 'required': True, 'bracket': '{'})
         try:
             parsed = next(command.parse(self._tex))
         except StopIteration:
+            self._logger.warning('lsstdoc has no setDocRef')
+            self._handle = None
+            self._series = None
+            self._serial = None
             return
 
         self._handle = parsed['handle']
-        self._series, self._serial = self._handle.split('-', 1)
+        try:
+            self._series, self._serial = self._handle.split('-', 1)
+        except ValueError:
+            self._logger.warning('lsstdoc handle cannot be parsed into '
+                                 'series and serial: %r', self._handle)
+            self._series = None
+            self._serial = None
 
     def _parse_author(self):
-        """Parse the author from TeX source.
+        r"""Parse the author from TeX source.
+
+        Sets the ``_authors`` attribute.
 
         Goal is to parse::
 
@@ -160,11 +436,15 @@ class LsstDoc(object):
         try:
             parsed = next(command.parse(self._tex))
         except StopIteration:
+            self._logger.warning('lsstdoc has no author')
+            self._authors = []
             return
 
         try:
             content = parsed['authors']
         except KeyError:
+            self._logger.warning('lsstdoc has no author')
+            self._authors = []
             return
 
         # Clean content
@@ -186,19 +466,84 @@ class LsstDoc(object):
         self._authors = authors
 
     def _parse_abstract(self):
+        """Parse the abstract from the TeX source.
+
+        Sets the ``_abstract`` attribute.
+        """
         command = LatexCommand(
             'setDocAbstract',
             {'name': 'abstract', 'required': True, 'bracket': '{'})
         try:
             parsed = next(command.parse(self._tex))
         except StopIteration:
+            self._logger.warning('lsstdoc has no abstract')
+            self._abstract = None
             return
 
         try:
             content = parsed['abstract']
         except KeyError:
+            self._logger.warning('lsstdoc has no abstract')
+            self._abstract = None
             return
 
         content = content.strip()
-        # TODO probably want to unwrap paragraphs.
         self._abstract = content
+
+    def _prep_snippet_for_pandoc(self, latex_text):
+        """Process a LaTeX snippet of content for better transformation
+        with pandoc.
+
+        Currently runs the CitationLinker to convert BibTeX citations to
+        href links.
+        """
+        replace_cite = CitationLinker(self.bib_db)
+        latex_text = replace_cite(latex_text)
+        return latex_text
+
+    def _load_bib_db(self):
+        r"""Load the BibTeX bibliography referenced by the document.
+
+        This method triggered by the `bib_db` attribute and populates the
+        `_bib_db` private attribute.
+
+        The ``\bibliography`` command is parsed to identify the bibliographies
+        referenced by the document.
+        """
+        # Get the names of custom bibtex files by parsing the
+        # \bibliography command and filtering out the default lsstdoc
+        # bibliographies.
+        command = LatexCommand(
+            'bibliography',
+            {'name': 'bib_names', 'required': True, 'bracket': '{'})
+        try:
+            parsed = next(command.parse(self._tex))
+            bib_names = [n.strip() for n in parsed['bib_names'].split(',')]
+        except StopIteration:
+            self._logger.warning('lsstdoc has no bibliography command')
+            bib_names = []
+        custom_bib_names = [n for n in bib_names
+                            if n not in KNOWN_LSSTTEXMF_BIB_NAMES]
+
+        # Read custom bibliographies.
+        custom_bibs = []
+        for custom_bib_name in custom_bib_names:
+            custom_bib_path = os.path.join(
+                os.path.join(self._root_dir),
+                custom_bib_name + '.bib'
+            )
+            if not os.path.exists(custom_bib_path):
+                self._logger.warning('Could not find bibliography %r',
+                                     custom_bib_path)
+                continue
+            with open(custom_bib_path, 'r') as file_handle:
+                custom_bibs.append(file_handle.read())
+        if len(custom_bibs) > 0:
+            custom_bibtex = '\n\n'.join(custom_bibs)
+        else:
+            custom_bibtex = None
+
+        # Get the combined pybtex bibliography
+        db = get_bibliography(bibtex=custom_bibtex)
+
+        self._bib_db = db
