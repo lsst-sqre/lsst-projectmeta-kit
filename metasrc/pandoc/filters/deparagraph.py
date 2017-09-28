@@ -9,8 +9,19 @@ def deparagraph(element, doc):
     """Panflute filter function that converts content wrapped in a Para to
     Plain.
 
+    Use this filter with pandoc as::
+
+        pandoc [..] --filter=metasrc-deparagraph
+
     Only lone paragraphs are affected. Para elements with siblings (like a
     second Para) are left unaffected.
+
+    This filter is useful for processing strings like titles or author names so
+    that the output isn't wrapped in paragraph tags. For example, without
+    this filter, pandoc converts a string ``"The title"`` to
+    ``<p>The title</p>`` in HTML. These ``<p>`` tags aren't useful if you
+    intend to put the title text in ``<h1>`` tags using your own templating
+    system.
     """
     if isinstance(element, Para):
         # Check if siblings exist; don't process the paragraph in that case.
@@ -25,5 +36,10 @@ def deparagraph(element, doc):
 
 
 def main():
-    """Setuptools entrypoint for the deparagraph CLI."""
+    """Setuptools entrypoint for the deparagraph CLI.
+
+    Use this filter as::
+
+        pandoc [..] --filter=metasrc-deparagraph
+    """
     toJSONFilter(deparagraph)

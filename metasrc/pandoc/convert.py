@@ -47,23 +47,39 @@ def convert_text(content, from_fmt, to_fmt, deparagraph=False, mathjax=False,
     ----------
     content : `str`
         Original content.
+
     from_fmt : `str`
         Format of the original ``content``. Format identifier must be one of
         those known by Pandoc. See https://pandoc.org/MANUAL.html for details.
+
     to_fmt : `str`
         Output format for the content.
+
     deparagraph : `bool`, optional
-        If `True`, then we run the
-        `metasrc.pandoc.filters.deparagraph.deparagraph` filter to remove the
-        paragraph (``<p>``, for example) tags around a single paragraph of
-        content. That filter does not affect content that consists of multiple
-        blocks (several paragraphs, or lists, for example). Default is `False`.
+        If `True`, then the
+        `metasrc.pandoc.filters.deparagraph.deparagraph` filter is used to
+        remove paragraph (``<p>``, for example) tags around a single paragraph
+        of content. That filter does not affect content that consists of
+        multiple blocks (several paragraphs, or lists, for example).
+        Default is `False`.
+
+        For example, **without** this filter Pandoc will convert
+        the string ``"Title text"`` to ``"<p>Title text</p>"`` in HTML. The
+        paragraph tags aren't useful if you intend to wrap the converted
+        content in different tags, like ``<h1>``, using your own templating
+        system.
+
+        **With** this filter, Pandoc will convert the string ``"Title text"``
+        to ``"Title text"`` in HTML.
+
     mathjax : `bool`, optional
         If `True` then Pandoc will markup output content to work with MathJax.
         Default is False.
+
     smart : `bool`, optional
         If `True` (default) then ascii characters will be converted to unicode
         characters like smart quotes and em dashes.
+
     extra_args : `list`, optional
         Sequence of Pandoc arguments command line arguments (such as
         ``'--normalize'``). The ``deparagraph``, ``mathjax``, and ``smart``
@@ -121,21 +137,36 @@ def convert_lsstdoc_tex(
     ----------
     content : `str`
         Original content.
+
     to_fmt : `str`
         Output format for the content (see https://pandoc.org/MANUAL.html).
         For example, 'html5'.
+
     deparagraph : `bool`, optional
-        If `True`, then we run the
-        `metasrc.pandoc.filters.deparagraph.deparagraph` filter to remove the
-        paragraph (``<p>``, for example) tags around a single paragraph of
-        content. That filter does not affect content that consists of multiple
-        blocks (several paragraphs, or lists, for example). Default is `False`.
+        If `True`, then the
+        `metasrc.pandoc.filters.deparagraph.deparagraph` filter is used to
+        remove paragraph (``<p>``, for example) tags around a single paragraph
+        of content. That filter does not affect content that consists of
+        multiple blocks (several paragraphs, or lists, for example).
+        Default is `False`.
+
+        For example, **without** this filter Pandoc will convert
+        the string ``"Title text"`` to ``"<p>Title text</p>"`` in HTML. The
+        paragraph tags aren't useful if you intend to wrap the converted
+        content in different tags, like ``<h1>``, using your own templating
+        system.
+
+        **With** this filter, Pandoc will convert the string ``"Title text"``
+        to ``"Title text"`` in HTML.
+
     mathjax : `bool`, optional
         If `True` then Pandoc will markup output content to work with MathJax.
         Default is False.
+
     smart : `bool`, optional
         If `True` (default) then ascii characters will be converted to unicode
         characters like smart quotes and em dashes.
+
     extra_args : `list`, optional
         Sequence of Pandoc arguments command line arguments (such as
         ``'--normalize'``). The ``deparagraph``, ``mathjax``, and ``smart``
