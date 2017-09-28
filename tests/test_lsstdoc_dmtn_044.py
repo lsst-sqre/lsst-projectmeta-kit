@@ -1,9 +1,9 @@
-"""Test LsstDoc using sample data from DMTN-044.tex.
+"""Test LsstLatexDoc using sample data from DMTN-044.tex.
 """
 
 import os
 import pytest
-from metasrc.tex.lsstdoc import LsstDoc
+from metasrc.tex.lsstdoc import LsstLatexDoc
 
 TITLE = "LSST DM Software Release Considerations"
 
@@ -87,7 +87,7 @@ def lsstdoc():
                             'data',
                             'DMTN-044',
                             'DMTN-044.tex')
-    return LsstDoc.read(tex_path)
+    return LsstLatexDoc.read(tex_path)
 
 
 @pytest.mark.parametrize('attribute,expected', ATTRIBUTES)

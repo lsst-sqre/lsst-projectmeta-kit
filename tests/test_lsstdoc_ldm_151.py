@@ -1,9 +1,9 @@
-"""Test LsstDoc using sample data from LDM-151.tex.
+"""Test LsstLatexDoc using sample data from LDM-151.tex.
 """
 
 import os
 import pytest
-from metasrc.tex.lsstdoc import LsstDoc
+from metasrc.tex.lsstdoc import LsstLatexDoc
 
 TITLE = "Data Management Science Pipelines Design"
 
@@ -144,7 +144,7 @@ def lsstdoc():
                             'data',
                             'LDM-151',
                             'LDM-151.tex')
-    return LsstDoc.read(tex_path)
+    return LsstLatexDoc.read(tex_path)
 
 
 @pytest.mark.parametrize('attribute,expected', ATTRIBUTES)

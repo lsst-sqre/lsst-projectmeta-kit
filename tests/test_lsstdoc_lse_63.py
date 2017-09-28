@@ -1,9 +1,9 @@
-"""Test LsstDoc using sample data from LSE-63.tex.
+"""Test LsstLatexDoc using sample data from LSE-63.tex.
 """
 
 import os
 import pytest
-from metasrc.tex.lsstdoc import LsstDoc
+from metasrc.tex.lsstdoc import LsstLatexDoc
 
 TITLE = "LSST Data Quality Assurance Plan"
 
@@ -141,7 +141,7 @@ def lsstdoc():
     tex_path = os.path.join(os.path.dirname(__file__),
                             'data',
                             'LSE-63.tex')
-    return LsstDoc.read(tex_path)
+    return LsstLatexDoc.read(tex_path)
 
 
 @pytest.mark.parametrize('attribute,expected', ATTRIBUTES)

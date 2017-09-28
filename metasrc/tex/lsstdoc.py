@@ -1,6 +1,6 @@
 """Metadata extraction from lsstdoc LSST LaTeX documents."""
 
-__all__ = ['LsstDoc']
+__all__ = ['LsstLatexDoc']
 
 import logging
 import os
@@ -13,8 +13,8 @@ from .lsstbib import get_bibliography, KNOWN_LSSTTEXMF_BIB_NAMES
 from .citelink import CitationLinker
 
 
-class LsstDoc(object):
-    """lsstdoc LaTeX document source.
+class LsstLatexDoc(object):
+    """An lsstdoc-class LaTeX document with metadata access.
 
     Parameters
     ----------
@@ -41,8 +41,8 @@ class LsstDoc(object):
 
     @classmethod
     def read(cls, root_tex_path):
-        """Construct an `LsstDoc` instance by reading and parsing the LaTeX
-        source.
+        """Construct an `LsstLatexDoc` instance by reading and parsing the
+        LaTeX source.
 
         Parameters
         ----------

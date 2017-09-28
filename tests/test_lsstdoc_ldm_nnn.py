@@ -1,9 +1,9 @@
-"""Test LsstDoc using sample data from LDM-nnn.tex.
+"""Test LsstLatexDoc using sample data from LDM-nnn.tex.
 """
 
 import os
 import pytest
-from metasrc.tex.lsstdoc import LsstDoc
+from metasrc.tex.lsstdoc import LsstLatexDoc
 
 TITLE = "Title of document"
 
@@ -75,7 +75,7 @@ ATTRIBUTES = [
 @pytest.fixture
 def lsstdoc():
     tex_path = os.path.join(os.path.dirname(__file__), 'data', 'LDM-nnn.tex')
-    return LsstDoc.read(tex_path)
+    return LsstLatexDoc.read(tex_path)
 
 
 @pytest.mark.parametrize('attribute,expected', ATTRIBUTES)
