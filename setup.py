@@ -46,7 +46,8 @@ setup(
         'panflute==1.10.6',
         'aiohttp>=2.2.5',
         'pybtex>=0.21',
-        'GitPython>=2.1.7'
+        'GitPython>=2.1.7',
+        'pytz'
     ],
     cmdclass=versioneer.get_cmdclass(),
     # package_data={},

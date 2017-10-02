@@ -93,3 +93,10 @@ def lsstdoc():
 @pytest.mark.parametrize('attribute,expected', ATTRIBUTES)
 def test_attribute(lsstdoc, attribute, expected):
     assert getattr(lsstdoc, attribute) == expected
+
+
+def test_revision_date(lsstdoc):
+    r"""DMTN-044 sets a 2017-06-26 value for \setDocDate, which is deprecated
+    and ignored (so it falls back to Git).
+    """
+    assert lsstdoc.revision_datetime_source == 'git'

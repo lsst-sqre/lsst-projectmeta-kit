@@ -2,8 +2,12 @@
 
 __all__ = ['LsstLatexDoc']
 
+import datetime
 import logging
 import os
+
+from pytz import timezone
+import pytz
 
 from .commandparser import LatexCommand
 from ..pandoc.convert import convert_lsstdoc_tex
@@ -11,6 +15,7 @@ from .scraper import get_macros
 from .normalizer import read_tex_file, replace_macros
 from .lsstbib import get_bibliography, KNOWN_LSSTTEXMF_BIB_NAMES
 from .citelink import CitationLinker
+from ..git.timestamp import get_content_commit_date
 
 
 class LsstLatexDoc(object):
@@ -183,6 +188,51 @@ class LsstLatexDoc(object):
             return True
         else:
             return False
+
+    @property
+    def revision_datetime(self):
+        """Current revision date of the document (`datetime.datetime`).
+
+        The `revision_datetime_source` describes how the revision date
+        is computed.
+
+        This ``revision datetime`` is cached the first time you access it. This
+        means that a datetime computed via ``now`` or ``git`` will not change
+        during the lifetime of an `LsstLatexDoc` object.
+        """
+        if not hasattr(self, '_datetime'):
+            self._parse_revision_date()
+
+        return self._datetime
+
+    @property
+    def revision_datetime_source(self):
+        r"""Data source for the `revision_datetime` attribute (`str`).
+
+        Possible string values are:
+
+        - ``'tex'``: The document revision date is defined in the ``\date``
+          command. ``YYYY-MM-DD`` dates are converted to UTC datetimes by
+          assuming the document is released at the beginning of the day in the
+          ``US/Pacific`` timezone.
+
+        - ``'git'``: The latest Git commit's timestamp that affected document
+          content. Content is considered any file with a ``tex``, ``bib``,
+          ``pdf``, ``jpg``, or ``png`` extension. Git timestamps are used when
+          the ``\date`` command is missing or can't be parsed.
+
+        - ``'now'``: The current date and time. This source is used as a
+          fallback when the LaTeX and Git-based methods of determining a
+          document's date fail.
+
+        The `revision datetime` is cached the first time you access it. This
+        means that a datetime computed via ``now`` or ``git`` will not change
+        during the lifetime of an `LsstLatexDoc` object.
+        """
+        if not hasattr(self, '_datetime'):
+            self._parse_revision_date()
+
+        return self._revision_datetime_source
 
     @property
     def bib_db(self):
@@ -547,3 +597,59 @@ class LsstLatexDoc(object):
         db = get_bibliography(bibtex=custom_bibtex)
 
         self._bib_db = db
+
+    def _parse_revision_date(self):
+        r"""Parse the ``\date`` command, falling back to getting the
+        most recent Git commit date and the current datetime.
+
+        Result is available from the `revision_datetime` attribute.
+        """
+        doc_datetime = None
+
+        # First try to parse the \date command in the latex
+        date_command = LatexCommand(
+            'date',
+            {'name': 'content', 'required': True, 'bracket': '{'})
+        try:
+            parsed = next(date_command.parse(self._tex))
+            command_content = parsed['content'].strip()
+        except StopIteration:
+            command_content = None
+            self._logger.warning('lsstdoc has no date command')
+
+        # Try to parse a date from the \date command
+        if command_content is not None and command_content != r'\today':
+            try:
+                doc_datetime = datetime.datetime.strptime(command_content,
+                                                          '%Y-%m-%d')
+                # Assume LSST project time (Pacific)
+                project_tz = timezone('US/Pacific')
+                localized_datetime = project_tz.localize(doc_datetime)
+                # Normalize to UTC
+                doc_datetime = localized_datetime.astimezone(pytz.utc)
+
+                self._revision_datetime_source = 'tex'
+            except ValueError:
+                self._logger.warning('Could not parse a datetime from lsstdoc '
+                                     'date command: %r',
+                                     command_content)
+
+        # Fallback to getting the datetime from Git
+        if doc_datetime is None:
+            content_extensions = ('tex', 'bib', 'pdf', 'png', 'jpg')
+            try:
+                doc_datetime = get_content_commit_date(
+                    content_extensions,
+                    root_dir=self._root_dir)
+                self._revision_datetime_source = 'git'
+            except RuntimeError:
+                self._logger.warning('Could not get a datetime from the Git '
+                                     'repository at %r',
+                                     self._root_dir)
+
+        # Final fallback to the current datetime
+        if doc_datetime is None:
+            doc_datetime = pytz.utc.localize(datetime.datetime.now())
+            self._revision_datetime_source = 'now'
+
+        self._datetime = doc_datetime
