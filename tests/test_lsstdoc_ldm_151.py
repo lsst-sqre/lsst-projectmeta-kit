@@ -1,8 +1,10 @@
 """Test LsstLatexDoc using sample data from LDM-151.tex.
 """
 
+import datetime
 import os
 import pytest
+import pytz
 from metasrc.tex.lsstdoc import LsstLatexDoc
 
 TITLE = "Data Management Science Pipelines Design"
@@ -150,3 +152,10 @@ def lsstdoc():
 @pytest.mark.parametrize('attribute,expected', ATTRIBUTES)
 def test_attribute(lsstdoc, attribute, expected):
     assert getattr(lsstdoc, attribute) == expected
+
+
+def test_revision_date(lsstdoc):
+    r"""LDM-151 uses a set value for \date."""
+    expected_datetime = datetime.datetime(2017, 7, 19, 7, 0, tzinfo=pytz.utc)
+    assert lsstdoc.revision_datetime == expected_datetime
+    assert lsstdoc.revision_datetime_source == 'tex'

@@ -2,6 +2,18 @@
 Change Log
 ##########
 
+0.2.1 (2017-10-09)
+==================
+
+- Add a ``LsstLatexDoc.revision_datetime`` attribute to access the latest revision date metadata of a LaTeX document.
+  This property uses a set value in the ``\date`` command, if available.
+  Otherwise it falls back to the timestamp of the most recent Git commit that affected content (files with ``tex``, ``bib``, ``pdf``, ``png``, and ``jpg`` extensions).
+  The final fallback is the current time.
+  The ``LsstLatexDoc.revision_datetime_source`` attribute describes how the date was computed: ``tex``, ``git``, or ``now``.
+- New ``metasrc.git.timestamp`` module for accessing commit dates from a local Git repository.
+- New dependency on ``pytz``.
+- New dependency on ``GitPython``.
+
 0.2.0 (2017-09-28)
 ==================
 

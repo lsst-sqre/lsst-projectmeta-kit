@@ -1,6 +1,7 @@
 """Test LsstLatexDoc using sample data from LDM-nnn.tex.
 """
 
+import datetime
 import os
 import pytest
 from metasrc.tex.lsstdoc import LsstLatexDoc
@@ -81,3 +82,11 @@ def lsstdoc():
 @pytest.mark.parametrize('attribute,expected', ATTRIBUTES)
 def test_attribute(lsstdoc, attribute, expected):
     assert getattr(lsstdoc, attribute) == expected
+
+
+def test_revision_date(lsstdoc):
+    r"""LDM-nnn is a draft so it falls back to git (would anyway since
+    ``\date`` is ``\today``).
+    """
+    assert isinstance(lsstdoc.revision_datetime, datetime.datetime)
+    assert lsstdoc.revision_datetime_source == 'git'
