@@ -107,6 +107,6 @@ def test_attribute(lsstdoc, attribute, expected):
 
 
 def test_revision_date(lsstdoc):
-    r"""DMTN-036 uses the \today value for \date."""
+    r"""DMTN-036 is a draft, so it falls back to Git."""
     assert isinstance(lsstdoc.revision_datetime, datetime.datetime)
     assert lsstdoc.revision_datetime_source == 'git'

@@ -85,6 +85,8 @@ def test_attribute(lsstdoc, attribute, expected):
 
 
 def test_revision_date(lsstdoc):
-    r"""LDM-nnn uses \today value for \date."""
+    r"""LDM-nnn is a draft so it falls back to git (would anyway since
+    ``\date`` is ``\today``).
+    """
     assert isinstance(lsstdoc.revision_datetime, datetime.datetime)
     assert lsstdoc.revision_datetime_source == 'git'

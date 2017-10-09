@@ -214,7 +214,9 @@ class LsstLatexDoc(object):
         - ``'tex'``: The document revision date is defined in the ``\date``
           command. ``YYYY-MM-DD`` dates are converted to UTC datetimes by
           assuming the document is released at the beginning of the day in the
-          ``US/Pacific`` timezone.
+          ``US/Pacific`` timezone. Note: the ``\date`` command is ignored
+          for draft documents (`is_draft` is `True`) so that drafts always
+          fall back to ``'git'`` or ``'now'``.
 
         - ``'git'``: The latest Git commit's timestamp that affected document
           content. Content is considered any file with a ``tex``, ``bib``,
@@ -606,33 +608,35 @@ class LsstLatexDoc(object):
         """
         doc_datetime = None
 
-        # First try to parse the \date command in the latex
-        date_command = LatexCommand(
-            'date',
-            {'name': 'content', 'required': True, 'bracket': '{'})
-        try:
-            parsed = next(date_command.parse(self._tex))
-            command_content = parsed['content'].strip()
-        except StopIteration:
-            command_content = None
-            self._logger.warning('lsstdoc has no date command')
-
-        # Try to parse a date from the \date command
-        if command_content is not None and command_content != r'\today':
+        # First try to parse the \date command in the latex.
+        # \date is ignored for draft documents.
+        if not self.is_draft:
+            date_command = LatexCommand(
+                'date',
+                {'name': 'content', 'required': True, 'bracket': '{'})
             try:
-                doc_datetime = datetime.datetime.strptime(command_content,
-                                                          '%Y-%m-%d')
-                # Assume LSST project time (Pacific)
-                project_tz = timezone('US/Pacific')
-                localized_datetime = project_tz.localize(doc_datetime)
-                # Normalize to UTC
-                doc_datetime = localized_datetime.astimezone(pytz.utc)
+                parsed = next(date_command.parse(self._tex))
+                command_content = parsed['content'].strip()
+            except StopIteration:
+                command_content = None
+                self._logger.warning('lsstdoc has no date command')
 
-                self._revision_datetime_source = 'tex'
-            except ValueError:
-                self._logger.warning('Could not parse a datetime from lsstdoc '
-                                     'date command: %r',
-                                     command_content)
+            # Try to parse a date from the \date command
+            if command_content is not None and command_content != r'\today':
+                try:
+                    doc_datetime = datetime.datetime.strptime(command_content,
+                                                              '%Y-%m-%d')
+                    # Assume LSST project time (Pacific)
+                    project_tz = timezone('US/Pacific')
+                    localized_datetime = project_tz.localize(doc_datetime)
+                    # Normalize to UTC
+                    doc_datetime = localized_datetime.astimezone(pytz.utc)
+
+                    self._revision_datetime_source = 'tex'
+                except ValueError:
+                    self._logger.warning('Could not parse a datetime from '
+                                         'lsstdoc date command: %r',
+                                         command_content)
 
         # Fallback to getting the datetime from Git
         if doc_datetime is None:
