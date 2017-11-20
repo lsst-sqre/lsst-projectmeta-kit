@@ -2,6 +2,14 @@
 Change Log
 ##########
 
+0.2.2 (2017-11-20)
+==================
+
+- Constrain ``pypandoc.download_pandoc`` to specifically install Pandoc 1.19.1 rather than the latest Pandoc.
+  We think that Pandoc 2.0+ may be incompatible with pypandoc 1.4's download function.
+  See `DM-12569 <https://jira.lsstcorp.org/browse/DM-12569>`_ for details.
+- Update pytest to 3.2.5 and pytest-flake8 to 0.9.1 to solve incompatibilities in the floating indirect dependencies.
+
 0.2.1 (2017-10-09)
 ==================
 

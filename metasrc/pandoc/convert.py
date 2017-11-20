@@ -26,7 +26,11 @@ def ensure_pandoc(func):
             # Install pandoc and retry
             message = "pandoc needed but not found. Now installing it for you."
             logger.warning(message)
-            pypandoc.download_pandoc()
+            # This version of pandoc is known to be compatible with both
+            # pypandoc.download_pandoc and the functionality that metasrc
+            # needs. Travis CI tests are useful for ensuring download_pandoc
+            # works.
+            pypandoc.download_pandoc(version='1.19.1')
             logger.debug("pandoc download complete")
 
             result = func(*args, **kwargs)
