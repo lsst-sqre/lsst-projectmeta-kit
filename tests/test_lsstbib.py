@@ -1,10 +1,10 @@
-"""Tests for the metasrc.tex.lsstbib module.
+"""Tests for the lsstprojectmeta.tex.lsstbib module.
 """
 
 from pybtex.database import BibliographyData, parse_string
 import pytest
 
-from metasrc.tex.lsstbib import (
+from lsstprojectmeta.tex.lsstbib import (
     get_lsst_bibtex, get_bibliography,
     get_url_from_entry, NoEntryUrlError,
     get_authoryear_from_entry, AuthorYearError)

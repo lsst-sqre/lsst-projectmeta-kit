@@ -4,7 +4,7 @@
 import datetime
 import os
 import pytest
-from metasrc.tex.lsstdoc import LsstLatexDoc
+from lsstprojectmeta.tex.lsstdoc import LsstLatexDoc
 
 TITLE = (
     "jointcal: Simultaneous Astrometry \\& Photometry for thousands "

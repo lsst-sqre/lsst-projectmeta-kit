@@ -1,4 +1,4 @@
-"""Tests for the metasrc.tex.normalizer module.
+"""Tests for the lsstprojectmeta.tex.normalizer module.
 """
 
 import os
@@ -6,7 +6,7 @@ import re
 
 import pytest
 
-import metasrc.tex.normalizer as normalizer
+import lsstprojectmeta.tex.normalizer as normalizer
 
 
 def test_remove_comments_abstract():

@@ -11,7 +11,7 @@ def deparagraph(element, doc):
 
     Use this filter with pandoc as::
 
-        pandoc [..] --filter=metasrc-deparagraph
+        pandoc [..] --filter=lsstprojectmeta-deparagraph
 
     Only lone paragraphs are affected. Para elements with siblings (like a
     second Para) are left unaffected.
@@ -40,6 +40,6 @@ def main():
 
     Use this filter as::
 
-        pandoc [..] --filter=metasrc-deparagraph
+        pandoc [..] --filter=lsstprojectmeta-deparagraph
     """
     toJSONFilter(deparagraph)

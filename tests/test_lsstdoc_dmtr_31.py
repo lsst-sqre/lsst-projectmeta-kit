@@ -5,7 +5,7 @@ import datetime
 import os
 import pytest
 import pytz
-from metasrc.tex.lsstdoc import LsstLatexDoc
+from lsstprojectmeta.tex.lsstdoc import LsstLatexDoc
 
 TITLE = "S17B HSC PDR1 Reprocessing Report"
 

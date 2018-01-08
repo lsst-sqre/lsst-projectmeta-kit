@@ -1,5 +1,6 @@
-"""LaTeX macros provided by the lsstdoc class. Metasrc mirrors these macros
-to allow Pandoc to resolve them.
+"""LaTeX macros provided by the lsstdoc class.
+
+lsstprojectmeta mirrors these macros to allow Pandoc to resolve them.
 """
 
 __all__ = ['LSSTDOC_MACROS']

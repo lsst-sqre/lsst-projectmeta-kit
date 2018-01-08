@@ -27,9 +27,9 @@ def ensure_pandoc(func):
             message = "pandoc needed but not found. Now installing it for you."
             logger.warning(message)
             # This version of pandoc is known to be compatible with both
-            # pypandoc.download_pandoc and the functionality that metasrc
-            # needs. Travis CI tests are useful for ensuring download_pandoc
-            # works.
+            # pypandoc.download_pandoc and the functionality that
+            # lsstprojectmeta needs. Travis CI tests are useful for ensuring
+            # download_pandoc works.
             pypandoc.download_pandoc(version='1.19.1')
             logger.debug("pandoc download complete")
 
@@ -61,11 +61,11 @@ def convert_text(content, from_fmt, to_fmt, deparagraph=False, mathjax=False,
 
     deparagraph : `bool`, optional
         If `True`, then the
-        `metasrc.pandoc.filters.deparagraph.deparagraph` filter is used to
-        remove paragraph (``<p>``, for example) tags around a single paragraph
-        of content. That filter does not affect content that consists of
-        multiple blocks (several paragraphs, or lists, for example).
-        Default is `False`.
+        `lsstprojectmeta.pandoc.filters.deparagraph.deparagraph` filter is
+        used to remove paragraph (``<p>``, for example) tags around a single
+        paragraph of content. That filter does not affect content that
+        consists of multiple blocks (several paragraphs, or lists, for
+        example). Default is `False`.
 
         For example, **without** this filter Pandoc will convert
         the string ``"Title text"`` to ``"<p>Title text</p>"`` in HTML. The
@@ -114,7 +114,7 @@ def convert_text(content, from_fmt, to_fmt, deparagraph=False, mathjax=False,
         extra_args.append('--smart')
 
     if deparagraph:
-        extra_args.append('--filter=metasrc-deparagraph')
+        extra_args.append('--filter=lsstprojectmeta-deparagraph')
 
     extra_args.append('--wrap=none')
 
@@ -148,11 +148,11 @@ def convert_lsstdoc_tex(
 
     deparagraph : `bool`, optional
         If `True`, then the
-        `metasrc.pandoc.filters.deparagraph.deparagraph` filter is used to
-        remove paragraph (``<p>``, for example) tags around a single paragraph
-        of content. That filter does not affect content that consists of
-        multiple blocks (several paragraphs, or lists, for example).
-        Default is `False`.
+        `lsstprojectmeta.pandoc.filters.deparagraph.deparagraph` filter is
+        used to remove paragraph (``<p>``, for example) tags around a single
+        paragraph of content. That filter does not affect content that
+        consists of multiple blocks (several paragraphs, or lists, for
+        example). Default is `False`.
 
         For example, **without** this filter Pandoc will convert
         the string ``"Title text"`` to ``"<p>Title text</p>"`` in HTML. The

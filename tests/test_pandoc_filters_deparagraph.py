@@ -1,7 +1,7 @@
-"""Test the metasrc-deparagraph Pandoc filter.
+"""Test the lsstprojectmeta-deparagraph Pandoc filter.
 
-The filter is implemented in metasrc.pandoc.filters.deparagraph, but we
-test it through the metasrc-deparagraph entrypoint.
+The filter is implemented in lsstprojectmeta.pandoc.filters.deparagraph, but we
+test it through the lsstprojectmeta-deparagraph entrypoint.
 """
 
 import pypandoc
@@ -18,5 +18,5 @@ import pytest
 def test_deparagraph(sample, expected):
     output = pypandoc.convert_text(
         sample, 'html5', format='latex',
-        extra_args=['--filter=metasrc-deparagraph'])
+        extra_args=['--filter=lsstprojectmeta-deparagraph'])
     assert output == expected

@@ -146,7 +146,7 @@ def replace_macros(tex_source, macros):
     macros : `dict`
         Keys are macro names (including leading ``\``) and values are the
         content (as `str`) of the macros. See
-        `metasrc.tex.scraper.get_macros`.
+        `lsstprojectmeta.tex.scraper.get_macros`.
 
     Returns
     -------

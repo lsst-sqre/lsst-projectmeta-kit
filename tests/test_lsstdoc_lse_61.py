@@ -5,7 +5,7 @@ import datetime
 import os
 import pytest
 import pytz
-from metasrc.tex.lsstdoc import LsstLatexDoc
+from lsstprojectmeta.tex.lsstdoc import LsstLatexDoc
 
 TITLE = "Data Management System (DMS) Requirements"
 

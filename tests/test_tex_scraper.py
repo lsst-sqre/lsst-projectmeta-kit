@@ -1,7 +1,7 @@
-"""Tests for metasrc.tex.scraper.
+"""Tests for lsstprojectmeta.tex.scraper.
 """
 
-from metasrc.tex import scraper
+from lsstprojectmeta.tex import scraper
 
 
 def test_get_def_macros():

@@ -59,9 +59,9 @@ class LsstLatexDoc(object):
         -----
         This method implements the following pipeline:
 
-        1. `metasrc.tex.normalizer.read_tex_file`
-        2. `metasrc.tex.scraper.get_macros`
-        3. `metasrc.tex.normalizer.replace_macros`
+        1. `lsstprojectmeta.tex.normalizer.read_tex_file`
+        2. `lsstprojectmeta.tex.scraper.get_macros`
+        3. `lsstprojectmeta.tex.normalizer.replace_macros`
 
         Thus ``input`` and ``includes`` are resolved along with simple macros.
         """
@@ -262,7 +262,7 @@ class LsstLatexDoc(object):
             Allow pandoc to create "smart" unicode punctuation.
         extra_args : `list`, optional
             Additional command line flags to pass to Pandoc. See
-            `metasrc.pandoc.convert.convert_text`.
+            `lsstprojectmeta.pandoc.convert.convert_text`.
 
         Returns
         -------
@@ -297,7 +297,7 @@ class LsstLatexDoc(object):
             Allow pandoc to create "smart" unicode punctuation.
         extra_args : `list`, optional
             Additional command line flags to pass to Pandoc. See
-            `metasrc.pandoc.convert.convert_text`.
+            `lsstprojectmeta.pandoc.convert.convert_text`.
 
         Returns
         -------
@@ -332,7 +332,7 @@ class LsstLatexDoc(object):
             Allow pandoc to create "smart" unicode punctuation.
         extra_args : `list`, optional
             Additional command line flags to pass to Pandoc. See
-            `metasrc.pandoc.convert.convert_text`.
+            `lsstprojectmeta.pandoc.convert.convert_text`.
 
         Returns
         -------
@@ -369,7 +369,7 @@ class LsstLatexDoc(object):
             Allow pandoc to create "smart" unicode punctuation.
         extra_args : `list`, optional
             Additional command line flags to pass to Pandoc. See
-            `metasrc.pandoc.convert.convert_text`.
+            `lsstprojectmeta.pandoc.convert.convert_text`.
 
         Returns
         -------

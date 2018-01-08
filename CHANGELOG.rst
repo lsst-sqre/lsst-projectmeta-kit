@@ -2,6 +2,14 @@
 Change Log
 ##########
 
+Unreleased
+==========
+
+- Rename repo to lsst-projectmeta-kit and rename the Python package to ``lsstprojectmeta``.
+  It's always been a struggle to name this project, but we're seeing "projectmeta" as the overall label for this initiative to capture LSST project metadata from documentation and code.
+  Thus the ``-kit`` suffix represents the toolkit for the wider lsst-projectmeta ecosystem of repositories.
+- the ``metasrc-deparagraph`` command line executable is now called ``lsstprojectmeta-deparagraph`` because of the rename.
+
 0.2.2 (2017-11-20)
 ==================
 
