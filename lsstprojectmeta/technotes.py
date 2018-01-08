@@ -33,7 +33,41 @@ async def reduce_technote(github_url, session):
     """
     metadata_yaml = await _download_metadata_yaml(session, github_url)
     metadata = yaml.safe_load(metadata_yaml)
-    print(metadata)
+
+    # Initialize a schema.org/Report and schema.org/SoftwareSourceCode
+    # linked data resource
+    jsonld = {
+        '@context': [
+            "https://raw.githubusercontent.com/codemeta/codemeta/2.0-rc/"
+            "codemeta.jsonld",
+            "http://schema.org"],
+        '@type': ['Report', 'SoftwareSourceCode'],
+        'codeRepository': github_url
+    }
+
+    if 'url' in metadata:
+        jsonld['@id'] = metadata['url']
+        jsonld['url'] = metadata['url']
+
+    if 'series' in metadata and 'serial_number' in metadata:
+        jsonld['reportNumber'] = '{series}-{serial_number}'.format(**metadata)
+
+    if 'doc_title' in metadata:
+        jsonld['name'] = metadata['doc_title']
+
+    if 'description' in metadata:
+        jsonld['description'] = metadata['description']
+
+    if 'authors' in metadata:
+        jsonld['author'] = [{'@type': 'Person', 'name': author_name}
+                            for author_name in metadata['authors']]
+
+    # Assume Travis is the CI service (always true at the moment)
+    repo_slug = _get_github_repo_slug(github_url)
+    travis_url = 'https://travis-ci.org/{}'.format(repo_slug)
+    jsonld['contIntegration'] = travis_url
+
+    return jsonld
 
 
 async def _download_metadata_yaml(session, github_url):
@@ -58,7 +92,25 @@ def _build_metadata_yaml_url(github_url):
     metadata_yaml_url : `str`
         metadata.yaml URL (using the ``raw.githubusercontent.com`` domain).
     """
-    # Extract repo slug from the repo url
+    repo_slug = _get_github_repo_slug(github_url)
+    template = 'https://raw.githubusercontent.com/{slug}/master/metadata.yaml'
+    return template.format(slug=repo_slug)
+
+
+def _get_github_repo_slug(github_url):
+    """Get the slug, <organization>/<repo_name>, or a GitHub repository from
+    its URL.
+
+    Parameters
+    ----------
+    github_url : `str`
+        URL of a GitHub repository.
+
+    Returns
+    -------
+    repo_slug : `str`
+        GitHub repository slug, formatted as ``<org>/<repo_name>``.
+    """
     match = GITHUB_SLUG_PATTERN.match(github_url)
     if match:
         repo_slug = '/'.join((match.group('org'),
@@ -66,6 +118,4 @@ def _build_metadata_yaml_url(github_url):
     else:
         message = 'Could not parse GitHub slug from {}'.format(github_url)
         raise RuntimeError(message)
-
-    template = 'https://raw.githubusercontent.com/{slug}/master/metadata.yaml'
-    return template.format(slug=repo_slug)
+    return repo_slug
