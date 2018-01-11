@@ -3,16 +3,9 @@
 
 __all__ = ('reduce_technote',)
 
-import re
-
 import yaml
 
-
-# Detects a GitHub repo slug from a GitHub URL
-GITHUB_SLUG_PATTERN = re.compile(
-    r"https://github.com"
-    r"/(?P<org>[a-z0-9\-_~%!$&'()*+,;=:@]+)"
-    r"/(?P<name>[a-z0-9\-_~%!$&'()*+,;=:@]+)")
+from .github.urls import parse_repo_slug_from_url
 
 
 async def reduce_technote(github_url, session):
@@ -63,8 +56,8 @@ async def reduce_technote(github_url, session):
                             for author_name in metadata['authors']]
 
     # Assume Travis is the CI service (always true at the moment)
-    repo_slug = _get_github_repo_slug(github_url)
-    travis_url = 'https://travis-ci.org/{}'.format(repo_slug)
+    repo_slug = parse_repo_slug_from_url(github_url)
+    travis_url = 'https://travis-ci.org/{}'.format(repo_slug.full)
     jsonld['contIntegration'] = travis_url
 
     return jsonld
@@ -92,9 +85,9 @@ def _build_metadata_yaml_url(github_url):
     metadata_yaml_url : `str`
         metadata.yaml URL (using the ``raw.githubusercontent.com`` domain).
     """
-    repo_slug = _get_github_repo_slug(github_url)
+    repo_slug = parse_repo_slug_from_url(github_url)
     template = 'https://raw.githubusercontent.com/{slug}/master/metadata.yaml'
-    return template.format(slug=repo_slug)
+    return template.format(slug=repo_slug.full)
 
 
 def _get_github_repo_slug(github_url):
