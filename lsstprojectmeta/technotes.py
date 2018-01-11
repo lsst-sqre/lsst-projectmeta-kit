@@ -5,7 +5,7 @@ __all__ = ('reduce_technote',)
 
 import yaml
 
-from .github.urls import parse_repo_slug_from_url
+from .github.urls import parse_repo_slug_from_url, make_raw_content_url
 
 
 async def reduce_technote(github_url, session):
@@ -86,29 +86,4 @@ def _build_metadata_yaml_url(github_url):
         metadata.yaml URL (using the ``raw.githubusercontent.com`` domain).
     """
     repo_slug = parse_repo_slug_from_url(github_url)
-    template = 'https://raw.githubusercontent.com/{slug}/master/metadata.yaml'
-    return template.format(slug=repo_slug.full)
-
-
-def _get_github_repo_slug(github_url):
-    """Get the slug, <organization>/<repo_name>, or a GitHub repository from
-    its URL.
-
-    Parameters
-    ----------
-    github_url : `str`
-        URL of a GitHub repository.
-
-    Returns
-    -------
-    repo_slug : `str`
-        GitHub repository slug, formatted as ``<org>/<repo_name>``.
-    """
-    match = GITHUB_SLUG_PATTERN.match(github_url)
-    if match:
-        repo_slug = '/'.join((match.group('org'),
-                              match.group('name')))
-    else:
-        message = 'Could not parse GitHub slug from {}'.format(github_url)
-        raise RuntimeError(message)
-    return repo_slug
+    return make_raw_content_url(repo_slug, 'master', 'metadata.yaml')
