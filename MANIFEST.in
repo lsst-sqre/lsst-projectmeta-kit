@@ -2,3 +2,4 @@ include versioneer.py
 include lsstprojectmeta/_version.py
 include README.rst
 include CHANGELOG.rst
+graft lsstprojectmeta/data/
