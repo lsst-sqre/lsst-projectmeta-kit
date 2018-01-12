@@ -6,9 +6,10 @@ __all__ = ('reduce_technote',)
 import yaml
 
 from .github.urls import parse_repo_slug_from_url, make_raw_content_url
+from .github.graphql import github_request, GitHubQuery
 
 
-async def reduce_technote(github_url, session):
+async def reduce_technote(github_url, session, github_api_token):
     """Reduce a technote project's metadata into JSON-LD.
 
     Parameters
@@ -18,14 +19,32 @@ async def reduce_technote(github_url, session):
     session : `aiohttp.ClientSession`
         Your application's aiohttp client session.
         See http://aiohttp.readthedocs.io/en/stable/client.html.
+    github_api_token : `str`
+        A GitHub personal API token. See the `GitHub personal access token
+        guide`_.
 
     Returns
     -------
     metadata : `dict`
         JSON-LD-formatted dictionary.
+
+    .. `GitHub personal access token guide`: https://ls.st/41d
     """
+    repo_slug = parse_repo_slug_from_url(github_url)
+
+    # Extract the metadata.yaml file
     metadata_yaml = await _download_metadata_yaml(session, github_url)
     metadata = yaml.safe_load(metadata_yaml)
+
+    # Extract data from the GitHub API
+    github_query = GitHubQuery.load('technote_repo')
+    github_variables = {
+        "orgName": repo_slug.owner,
+        "repoName": repo_slug.repo
+    }
+    github_data = await github_request(session, github_api_token,
+                                       query=github_query,
+                                       variables=github_variables)
 
     # Initialize a schema.org/Report and schema.org/SoftwareSourceCode
     # linked data resource
@@ -55,8 +74,37 @@ async def reduce_technote(github_url, session):
         jsonld['author'] = [{'@type': 'Person', 'name': author_name}
                             for author_name in metadata['authors']]
 
+    try:
+        _master_data = github_data['data']['repository']['defaultBranchRef']
+        jsonld['dateModified'] = _master_data['target']['committedDate']
+    except KeyError:
+        pass
+
+    try:
+        _license_data = github_data['data']['repository']['licenseInfo']
+        _spdxId = _license_data['spdxId']
+        if _spdxId is not None:
+            _spdx_url = 'https://spdx.org/licenses/{}.html'.format(_spdxId)
+            jsonld['license'] = _spdx_url
+    except KeyError:
+        pass
+
+    try:
+        # Find the README(|.md|.rst|*) file in the repo root
+        _master_data = github_data['data']['repository']['defaultBranchRef']
+        _files = _master_data['target']['tree']['entries']
+        for _node in _files:
+            filename = _node['name']
+            normalized_filename = filename.lower()
+            if normalized_filename.startswith('readme'):
+                readme_url = make_raw_content_url(repo_slug, 'master',
+                                                  filename)
+                jsonld['readme'] = readme_url
+                break
+    except KeyError:
+        pass
+
     # Assume Travis is the CI service (always true at the moment)
-    repo_slug = parse_repo_slug_from_url(github_url)
     travis_url = 'https://travis-ci.org/{}'.format(repo_slug.full)
     jsonld['contIntegration'] = travis_url
 

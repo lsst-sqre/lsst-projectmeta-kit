@@ -36,6 +36,8 @@ def test_download_metadata_yaml():
     loop.run_until_complete(_test())
 
 
+@pytest.mark.skip(reason="Needs to be refactored to eliminate network "
+                         "requests")
 def test_sqr_020():
     github_url = 'https://github.com/lsst-sqre/sqr-020'
 
