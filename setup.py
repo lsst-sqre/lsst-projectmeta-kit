@@ -49,7 +49,8 @@ setup(
         'aiohttp>=2.2.5',
         'pybtex>=0.21',
         'GitPython>=2.1.7',
-        'pytz'
+        'pytz',
+        'motor>=1.2.0, <1.3.0'
     ],
     cmdclass=versioneer.get_cmdclass(),
     # package_data={},

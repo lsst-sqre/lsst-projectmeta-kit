@@ -9,7 +9,8 @@ from .github.urls import parse_repo_slug_from_url, make_raw_content_url
 from .github.graphql import github_request, GitHubQuery
 
 
-async def reduce_technote(github_url, session, github_api_token):
+async def reduce_technote(github_url, session, github_api_token,
+                          mongo_collection=None):
     """Reduce a technote project's metadata into JSON-LD.
 
     Parameters
@@ -22,6 +23,9 @@ async def reduce_technote(github_url, session, github_api_token):
     github_api_token : `str`
         A GitHub personal API token. See the `GitHub personal access token
         guide`_.
+    mongo_collection : `motor.motor_asyncio.AsyncIOMotorCollection`, optional
+        MongoDB collection. This should be the common MongoDB collection for
+        LSST projectmeta JSON-LD records.
 
     Returns
     -------
@@ -108,6 +112,9 @@ async def reduce_technote(github_url, session, github_api_token):
     travis_url = 'https://travis-ci.org/{}'.format(repo_slug.full)
     jsonld['contIntegration'] = travis_url
 
+    if mongo_collection is not None:
+        await _upload_to_mongodb(mongo_collection, jsonld)
+
     return jsonld
 
 
@@ -135,3 +142,22 @@ def _build_metadata_yaml_url(github_url):
     """
     repo_slug = parse_repo_slug_from_url(github_url)
     return make_raw_content_url(repo_slug, 'master', 'metadata.yaml')
+
+
+async def _upload_to_mongodb(collection, jsonld):
+    """Upsert the technote resource into the projectmeta MongoDB collection.
+
+    Parameters
+    ----------
+    collection : `motor.motor_asyncio.AsyncIOMotorCollection`
+        The MongoDB collection.
+    jsonld : `dict`
+        The JSON-LD document that reprsents the technote resource.
+    """
+    document = {
+        'data': jsonld
+    }
+    query = {
+        'data.reportNumber': jsonld['reportNumber']
+    }
+    await collection.update(query, document, upsert=True, multi=False)
