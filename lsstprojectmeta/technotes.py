@@ -4,6 +4,7 @@
 __all__ = ('reduce_technote',)
 
 import yaml
+import datetime
 
 from .github.urls import parse_repo_slug_from_url, make_raw_content_url
 from .github.graphql import github_request, GitHubQuery
@@ -80,7 +81,10 @@ async def reduce_technote(github_url, session, github_api_token,
 
     try:
         _master_data = github_data['data']['repository']['defaultBranchRef']
-        jsonld['dateModified'] = _master_data['target']['committedDate']
+        _modified_datetime = datetime.datetime.strptime(
+            _master_data['target']['committedDate'],
+            '%Y-%m-%dT%H:%M:%SZ')
+        jsonld['dateModified'] = _modified_datetime
     except KeyError:
         pass
 
