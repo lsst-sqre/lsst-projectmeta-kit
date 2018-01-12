@@ -56,7 +56,9 @@ setup(
     entry_points={
         'console_scripts': [
             ('lsstprojectmeta-deparagraph '
-             '= lsstprojectmeta.pandoc.filters.deparagraph:main')
+             '= lsstprojectmeta.pandoc.filters.deparagraph:main'),
+            ('lsstprojectmeta-ingest-technote '
+             '= lsstprojectmeta.cli.technote:main')
         ]
     }
 )
