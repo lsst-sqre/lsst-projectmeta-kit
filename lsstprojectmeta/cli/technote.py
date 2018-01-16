@@ -36,7 +36,7 @@ def main():
     args = parser.parse_args()
 
     if args.mongodb_uri is not None:
-        mongo_client = AsyncIOMotorClient(args.mongodb_uri)
+        mongo_client = AsyncIOMotorClient(args.mongodb_uri, ssl=True)
         collection = mongo_client[args.mongodb_db][args.mongodb_collection]
     else:
         collection = None
