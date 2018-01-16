@@ -1,18 +1,47 @@
 """Reduce technote projects into JSON-LD metadata.
 """
 
-__all__ = ('reduce_technote',)
+__all__ = ('get_ltd_product_urls', 'process_technote_products',
+           'process_technote', 'reduce_technote_metadata')
+
+import asyncio
+import datetime
+import re
 
 import yaml
-import datetime
 
 from .github.urls import parse_repo_slug_from_url, make_raw_content_url
 from .github.graphql import github_request, GitHubQuery
 
 
-async def reduce_technote(github_url, session, github_api_token,
-                          mongo_collection=None):
-    """Reduce a technote project's metadata into JSON-LD.
+TECHNOTE_HANDLE_PATTERN = re.compile(r'^(sqr|dmtn|smtn)-\d+')
+
+
+async def get_ltd_product_urls(session):
+    """Get URLs for LSST the Docs (LTD) products from the LTD Keeper API.
+
+    Parameters
+    ----------
+    session : `aiohttp.ClientSession`
+        Your application's aiohttp client session.
+        See http://aiohttp.readthedocs.io/en/stable/client.html.
+
+    Returns
+    -------
+    product_urls : `list`
+        List of product URLs.
+    """
+    product_url = 'https://keeper.lsst.codes/products/'
+    async with session.get(product_url) as response:
+        data = await response.json()
+
+    return data['products']
+
+
+async def process_technote_products(session, product_urls, github_api_token,
+                                    mongo_collection=None):
+    """Run a pipeline to process extract, transform, and load metadata for
+    multiple technote projects
 
     Parameters
     ----------
@@ -27,6 +56,39 @@ async def reduce_technote(github_url, session, github_api_token,
     mongo_collection : `motor.motor_asyncio.AsyncIOMotorCollection`, optional
         MongoDB collection. This should be the common MongoDB collection for
         LSST projectmeta JSON-LD records.
+    """
+    tasks = [asyncio.ensure_future(
+             process_technote(session, github_api_token,
+                              ltd_product_url=product_url,
+                              mongo_collection=mongo_collection))
+             for product_url in product_urls]
+    await asyncio.gather(*tasks)
+
+
+async def process_technote(session, github_api_token,
+                           ltd_product_url=None,
+                           github_url=None,
+                           mongo_collection=None):
+    """ETL pipeline for a technote resource.
+
+    Parameters
+    ----------
+    session : `aiohttp.ClientSession`
+        Your application's aiohttp client session.
+        See http://aiohttp.readthedocs.io/en/stable/client.html.
+    github_api_token : `str`
+        A GitHub personal API token. See the `GitHub personal access token
+        guide`_.
+    ltd_product_url : `str`, optional
+        URL of the technote's product resource in the LTD Keeper API. This
+        URL can be used instead of providing a ``github_url``.
+    github_url : `str`, optional
+        URL of a technote's GitHub repository. If provided, this URL is
+        used instead of ``ltd_product_url`` as the root of the data pipeline.
+    mongo_collection : `motor.motor_asyncio.AsyncIOMotorCollection`, optional
+        MongoDB collection. This should be the common MongoDB collection for
+        LSST projectmeta JSON-LD records. If provided, ths JSON-LD is upserted
+        into the MongoDB collection.
 
     Returns
     -------
@@ -35,6 +97,27 @@ async def reduce_technote(github_url, session, github_api_token,
 
     .. `GitHub personal access token guide`: https://ls.st/41d
     """
+    print('starting {} | {}'.format(ltd_product_url, github_url))
+    if github_url is None:
+        async with session.get(ltd_product_url) as response:
+            ltd_product_data = await response.json()
+        print(ltd_product_data)
+        product_name = ltd_product_data['slug']
+
+        # Ensure the product is a technote
+        technote_series_match = TECHNOTE_HANDLE_PATTERN.match(product_name)
+        if technote_series_match is None:
+            # TODO could log or raise an exception here?
+            print('{} is not a technote'.format(product_name))
+            return
+
+        github_url = ltd_product_data['doc_repo']
+        print(github_url)
+
+    # Strip the .git extension, if present
+    if github_url.endswith('.git'):
+        github_url = github_url[:-4]
+
     repo_slug = parse_repo_slug_from_url(github_url)
 
     # Extract the metadata.yaml file
@@ -50,6 +133,45 @@ async def reduce_technote(github_url, session, github_api_token,
     github_data = await github_request(session, github_api_token,
                                        query=github_query,
                                        variables=github_variables)
+
+    try:
+        jsonld = reduce_technote_metadata(github_url, metadata, github_data)
+    except Exception as exception:
+        message = "Issue building JSON-LD for technote {url}:\n\t{err}"
+        print(message.format(url=github_url, err=exception))
+        return
+
+    if mongo_collection is not None:
+        await _upload_to_mongodb(mongo_collection, jsonld)
+    print(jsonld)
+
+    print('finished {} | {}'.format(ltd_product_url, github_url))
+
+    return jsonld
+
+
+def reduce_technote_metadata(github_url, metadata, github_data):
+    """Reduce a technote project's metadata from multiple sources into a
+    single JSON-LD resource.
+
+    Parameters
+    ----------
+    github_url : `str`
+        URL of the technote's GitHub repository.
+    metadata : `dict`
+        The parsed contents of ``metadata.yaml`` found in a technote's
+        repository.
+    github_data : `dict`
+        The contents of the ``technote_repo`` GitHub GraphQL API query.
+
+    Returns
+    -------
+    metadata : `dict`
+        JSON-LD-formatted dictionary.
+
+    .. `GitHub personal access token guide`: https://ls.st/41d
+    """
+    repo_slug = parse_repo_slug_from_url(github_url)
 
     # Initialize a schema.org/Report and schema.org/SoftwareSourceCode
     # linked data resource
@@ -68,6 +190,8 @@ async def reduce_technote(github_url, session, github_api_token,
 
     if 'series' in metadata and 'serial_number' in metadata:
         jsonld['reportNumber'] = '{series}-{serial_number}'.format(**metadata)
+    else:
+        raise RuntimeError('No reportNumber: {}'.format(github_url))
 
     if 'doc_title' in metadata:
         jsonld['name'] = metadata['doc_title']
@@ -115,9 +239,6 @@ async def reduce_technote(github_url, session, github_api_token,
     # Assume Travis is the CI service (always true at the moment)
     travis_url = 'https://travis-ci.org/{}'.format(repo_slug.full)
     jsonld['contIntegration'] = travis_url
-
-    if mongo_collection is not None:
-        await _upload_to_mongodb(mongo_collection, jsonld)
 
     return jsonld
 
