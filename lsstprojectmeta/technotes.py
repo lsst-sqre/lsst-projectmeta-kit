@@ -113,6 +113,9 @@ async def process_technote(session, github_api_token,
 
         github_url = ltd_product_data['doc_repo']
         print(github_url)
+    else:
+        # The LSST the Docs product resource wasn't downloaded
+        ltd_product_data = {}
 
     # Strip the .git extension, if present
     if github_url.endswith('.git'):
@@ -135,7 +138,8 @@ async def process_technote(session, github_api_token,
                                        variables=github_variables)
 
     try:
-        jsonld = reduce_technote_metadata(github_url, metadata, github_data)
+        jsonld = reduce_technote_metadata(
+            github_url, metadata, github_data, ltd_product_data)
     except Exception as exception:
         message = "Issue building JSON-LD for technote {url}:\n\t{err}"
         print(message.format(url=github_url, err=exception))
@@ -150,7 +154,8 @@ async def process_technote(session, github_api_token,
     return jsonld
 
 
-def reduce_technote_metadata(github_url, metadata, github_data):
+def reduce_technote_metadata(github_url, metadata, github_data,
+                             ltd_product_data):
     """Reduce a technote project's metadata from multiple sources into a
     single JSON-LD resource.
 
@@ -163,6 +168,9 @@ def reduce_technote_metadata(github_url, metadata, github_data):
         repository.
     github_data : `dict`
         The contents of the ``technote_repo`` GitHub GraphQL API query.
+    ltd_product_data : `dict`
+        JSON dataset for the technote corresponding to the
+        ``/products/<product>`` of LTD Keeper.
 
     Returns
     -------
@@ -185,8 +193,14 @@ def reduce_technote_metadata(github_url, metadata, github_data):
     }
 
     if 'url' in metadata:
-        jsonld['@id'] = metadata['url']
-        jsonld['url'] = metadata['url']
+        url = metadata['url']
+    elif 'published_url' in ltd_product_data:
+        url = ltd_product_data['published_url']
+    else:
+        raise RuntimeError('No identifying url could be found: '
+                           '{}'.format(github_url))
+    jsonld['@id'] = url
+    jsonld['url'] = url
 
     if 'series' in metadata and 'serial_number' in metadata:
         jsonld['reportNumber'] = '{series}-{serial_number}'.format(**metadata)
