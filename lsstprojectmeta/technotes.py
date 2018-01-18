@@ -217,14 +217,23 @@ def reduce_technote_metadata(github_url, metadata, github_data,
         jsonld['author'] = [{'@type': 'Person', 'name': author_name}
                             for author_name in metadata['authors']]
 
-    try:
-        _master_data = github_data['data']['repository']['defaultBranchRef']
-        _modified_datetime = datetime.datetime.strptime(
-            _master_data['target']['committedDate'],
-            '%Y-%m-%dT%H:%M:%SZ')
-        jsonld['dateModified'] = _modified_datetime
-    except KeyError:
-        pass
+    if 'last_revised' in metadata:
+        # Prefer getting the 'last_revised' date from metadata.yaml
+        # since it's considered an override.
+        jsonld['dateModified'] = datetime.datetime.strptime(
+            metadata['last_revised'],
+            '%Y-%m-%d')
+    else:
+        # Fallback to parsing the date of the last commit to the
+        # default branch on GitHub (usually `master`).
+        try:
+            _repo_data = github_data['data']['repository']
+            _master_data = _repo_data['defaultBranchRef']
+            jsonld['dateModified'] = datetime.datetime.strptime(
+                _master_data['target']['committedDate'],
+                '%Y-%m-%dT%H:%M:%SZ')
+        except KeyError:
+            pass
 
     try:
         _license_data = github_data['data']['repository']['licenseInfo']
