@@ -5,10 +5,22 @@ Change Log
 Unreleased
 ==========
 
+Changes
+-------
+
 - Rename repo to lsst-projectmeta-kit and rename the Python package to ``lsstprojectmeta``.
   It's always been a struggle to name this project, but we're seeing "projectmeta" as the overall label for this initiative to capture LSST project metadata from documentation and code.
   Thus the ``-kit`` suffix represents the toolkit for the wider lsst-projectmeta ecosystem of repositories.
-- the ``metasrc-deparagraph`` command line executable is now called ``lsstprojectmeta-deparagraph`` because of the rename.
+- The ``metasrc-deparagraph`` command line executable is now called ``lsstprojectmeta-deparagraph`` because of the rename.
+
+New
+---
+
+- New dependencies on ``'motor>=1.2.0, <1.3.0'``.
+- New ``lsstprojectmeta.github.graphql`` module that provides access to predefined GraphQL queries and executes them on the GitHub v4 (GraphQL) API.
+- Extract-transform-load pipeline for reStructuredText-based LSST technotes.
+  It uses the LSST the Docs API to find technote projects, then for each technote gets a ``metadata.yaml`` file and additional data from the GitHub API.
+  The ETL pipeline merges this data in a JSON-LD document that is loaded into the LSST Projectmeta MongoDB service.
 
 0.2.2 (2017-11-20)
 ==================
