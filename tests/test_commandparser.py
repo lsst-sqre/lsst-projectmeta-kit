@@ -6,7 +6,7 @@ import re
 
 import pytest
 
-from metasrc.tex.commandparser import LatexCommand
+from lsstprojectmeta.tex.commandparser import LatexCommand
 
 
 @pytest.fixture

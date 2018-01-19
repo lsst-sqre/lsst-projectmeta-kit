@@ -18,8 +18,8 @@ class CitationLinker(object):
     Parameters
     ----------
     bibtex_database : `pybtex.database.BibliographyData`
-        A pybtex bibliography. Use `metasrc.lsstbib.get_bibliography` to get
-        this.
+        A pybtex bibliography. Use `lsstprojectmeta.lsstbib.get_bibliography`
+        to get this.
     """
 
     def __init__(self, bibtex_database):

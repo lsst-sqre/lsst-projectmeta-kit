@@ -1,1 +1,1 @@
-metasrc/_version.py export-subst
+lsstprojectmeta/_version.py export-subst

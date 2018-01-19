@@ -4,12 +4,14 @@ from io import open
 import versioneer
 
 
-packagename = 'metasrc'
-description = 'LSST project metadata synthesis and JSON-LD export library.'
+packagename = 'lsst-projectmeta-kit'
+description = ("Python toolkit for extracting and transforming metadata "
+               "about LSST's code and documentation projects, and loading "
+               "it into the LSST projectmeta database.")
 author = 'Association of Universities for Research in Astronomy, Inc.'
 author_email = 'jsick@lsst.org'
 license = 'MIT'
-url = 'https://github.com/lsst-sqre/metasrc'
+url = 'https://github.com/lsst-sqre/lsst-projectmeta-kit'
 
 
 def read(filename):
@@ -47,13 +49,17 @@ setup(
         'aiohttp>=2.2.5',
         'pybtex>=0.21',
         'GitPython>=2.1.7',
-        'pytz'
+        'pytz',
+        'motor>=1.2.0, <1.3.0'
     ],
     cmdclass=versioneer.get_cmdclass(),
     # package_data={},
     entry_points={
         'console_scripts': [
-            'metasrc-deparagraph = metasrc.pandoc.filters.deparagraph:main'
+            ('lsstprojectmeta-deparagraph '
+             '= lsstprojectmeta.pandoc.filters.deparagraph:main'),
+            ('lsstprojectmeta-ingest-technote '
+             '= lsstprojectmeta.cli.technote:main')
         ]
     }
 )

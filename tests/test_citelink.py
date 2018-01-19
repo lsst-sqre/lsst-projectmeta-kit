@@ -1,11 +1,11 @@
-"""Test the metasrc.tex.citelink module.
+"""Test the lsstprojectmeta.tex.citelink module.
 """
 
 import pytest
 
-from metasrc.tex.citelink import (
+from lsstprojectmeta.tex.citelink import (
     CitedsLinker, CitedspLinker, CitepLinker)
-from metasrc.tex.lsstbib import get_bibliography
+from lsstprojectmeta.tex.lsstbib import get_bibliography
 
 
 @pytest.mark.parametrize(

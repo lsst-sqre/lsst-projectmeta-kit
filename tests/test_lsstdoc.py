@@ -5,7 +5,7 @@ LsstLatexDoc against sample documents.
 from pybtex.database import BibliographyData
 import pytest
 
-from metasrc.tex.lsstdoc import LsstLatexDoc
+from lsstprojectmeta.tex.lsstdoc import LsstLatexDoc
 
 
 def test_no_short_title():

@@ -3,7 +3,7 @@
 
 import os
 import pytest
-from metasrc.tex.lsstdoc import LsstLatexDoc
+from lsstprojectmeta.tex.lsstdoc import LsstLatexDoc
 
 TITLE = "LSST DM Software Release Considerations"
 
