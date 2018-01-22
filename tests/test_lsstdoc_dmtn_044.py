@@ -80,6 +80,20 @@ ATTRIBUTES = [
     ('serial', SERIAL),
 ]
 
+JSONLD = {
+    '@context': [
+        "https://raw.githubusercontent.com/codemeta/codemeta/2.0-rc/"
+        "codemeta.jsonld",
+        "http://schema.org"],
+    '@type': ['Report', 'SoftwareSourceCode'],
+    'language': 'TeX',
+    'reportNumber': HANDLE,
+    'name': PLAIN_TITLE,
+    'description': PLAIN_ABSTRACT,
+    'author': [{'@type': 'Person', 'name': author_name}
+               for author_name in PLAIN_AUTHORS],
+}
+
 
 @pytest.fixture
 def lsstdoc():
@@ -100,3 +114,10 @@ def test_revision_date(lsstdoc):
     and ignored (so it falls back to Git).
     """
     assert lsstdoc.revision_datetime_source == 'git'
+
+
+def test_jsonld(lsstdoc):
+    jsonld = lsstdoc.build_jsonld()
+    for key, value in JSONLD.items():
+        assert jsonld[key] == value
+    assert jsonld['dateModified'] == lsstdoc.revision_datetime
