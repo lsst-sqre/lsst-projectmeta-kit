@@ -52,6 +52,13 @@ setup(
         'pytz',
         'motor>=1.2.0, <1.3.0'
     ],
+    extras_require={
+        'dev': [
+            # Development/testing dependencies
+            'pytest==3.2.5',
+            'pytest-cov==2.5.0',
+            'pytest-flake8==0.9.1',
+        ]},
     cmdclass=versioneer.get_cmdclass(),
     # package_data={},
     entry_points={
