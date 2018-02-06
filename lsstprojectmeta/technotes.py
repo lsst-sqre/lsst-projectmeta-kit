@@ -12,6 +12,7 @@ import yaml
 
 from .github.urls import parse_repo_slug_from_url, make_raw_content_url
 from .github.graphql import github_request, GitHubQuery
+from .ltd import get_ltd_product
 
 
 TECHNOTE_HANDLE_PATTERN = re.compile(r'^(sqr|dmtn|smtn)-\d+')
@@ -78,9 +79,8 @@ async def process_technote(session, github_api_token,
     """
     print('starting {} | {}'.format(ltd_product_url, github_url))
     if github_url is None:
-        async with session.get(ltd_product_url) as response:
-            ltd_product_data = await response.json()
-        print(ltd_product_data)
+        ltd_product_data = await get_ltd_product(session, url=ltd_product_url)
+
         product_name = ltd_product_data['slug']
 
         # Ensure the product is a technote
