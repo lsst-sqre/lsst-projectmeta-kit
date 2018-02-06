@@ -1,7 +1,7 @@
 """JSON-LD utilities.
 """
 
-__all__ = ('encode_jsonld', 'JsonLdEncoder')
+__all__ = ('encode_jsonld', 'JsonLdEncoder', 'decode_jsonld')
 
 import datetime
 import json
@@ -58,3 +58,46 @@ class JsonLdEncoder(json.JSONEncoder):
         dt = dt.astimezone(datetime.timezone.utc)
 
         return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+
+def decode_jsonld(jsonld_text):
+    """Decode a JSON-LD dataset, including decoding datetime
+    strings into `datetime.datetime` objects.
+
+    Parameters
+    ----------
+    encoded_dataset : `str`
+        The JSON-LD dataset encoded as a string.
+
+    Returns
+    -------
+    jsonld_dataset : `dict`
+        A JSON-LD dataset.
+
+    Examples
+    --------
+
+    >>> doc = '{"dt": "2018-01-01T12:00:00Z"}'
+    >>> decode_jsonld(doc)
+    {'dt': datetime.datetime(2018, 1, 1, 12, 0, tzinfo=datetime.timezone.utc)}
+    """
+    decoder = json.JSONDecoder(object_pairs_hook=_decode_object_pairs)
+    return decoder.decode(jsonld_text)
+
+
+def _decode_object_pairs(pairs):
+    doc = {}
+    for key, value in pairs:
+        if isinstance(value, str):
+            # attempt to parse as a datetime
+            try:
+                value = datetime.datetime.strptime(value, '%Y-%m-%dT%H:%M:%SZ')
+                # ensure timezone is UTC
+                if value.tzinfo is None:
+                    value = value.replace(tzinfo=datetime.timezone.utc)
+                value = value.astimezone(datetime.timezone.utc)
+            except ValueError:
+                pass
+
+        doc[key] = value
+    return doc
