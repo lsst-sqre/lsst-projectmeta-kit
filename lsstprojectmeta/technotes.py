@@ -1,7 +1,7 @@
 """Reduce technote projects into JSON-LD metadata.
 """
 
-__all__ = ('get_ltd_product_urls', 'process_technote_products',
+__all__ = ('process_technote_products',
            'process_technote', 'reduce_technote_metadata')
 
 import asyncio
@@ -15,27 +15,6 @@ from .github.graphql import github_request, GitHubQuery
 
 
 TECHNOTE_HANDLE_PATTERN = re.compile(r'^(sqr|dmtn|smtn)-\d+')
-
-
-async def get_ltd_product_urls(session):
-    """Get URLs for LSST the Docs (LTD) products from the LTD Keeper API.
-
-    Parameters
-    ----------
-    session : `aiohttp.ClientSession`
-        Your application's aiohttp client session.
-        See http://aiohttp.readthedocs.io/en/stable/client.html.
-
-    Returns
-    -------
-    product_urls : `list`
-        List of product URLs.
-    """
-    product_url = 'https://keeper.lsst.codes/products/'
-    async with session.get(product_url) as response:
-        data = await response.json()
-
-    return data['products']
 
 
 async def process_technote_products(session, product_urls, github_api_token,
