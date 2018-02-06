@@ -65,8 +65,8 @@ setup(
         'console_scripts': [
             ('lsstprojectmeta-deparagraph '
              '= lsstprojectmeta.pandoc.filters.deparagraph:main'),
-            ('lsstprojectmeta-ingest-technote '
-             '= lsstprojectmeta.cli.technote:main')
+            ('lsstprojectmeta-ingest-docs '
+             '= lsstprojectmeta.cli.ingestdocs:main')
         ]
     }
 )
