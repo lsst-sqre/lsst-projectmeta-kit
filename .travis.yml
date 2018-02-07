@@ -1,12 +1,20 @@
 sudo: false
 language: python
 python:
+  # General Python matrix
   - "3.5"
-  - "3.6"
+matrix:
+  include:
+    # Additional job that can also deploy to PyPI
+    - python: "3.6"
+      env: "PYPI_DEPLOY=true"
 install:
-  - "pip install -r requirements.txt"
+  - "pip install .[dev]"
 script:
   - "make test"
+env:
+  global:
+    - "PYPI_DEPLOY=false"
 deploy:
   provider: pypi
   user: sqre-admin
@@ -15,5 +23,6 @@ deploy:
   on:
     tags: true
     repo: lsst-sqre/lsst-projectmeta-kit
+    condition: "$PYPI_DEPLOY = true"
   skip_upload_docs: true
   distributions: sdist bdist_wheel

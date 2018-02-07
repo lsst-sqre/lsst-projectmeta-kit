@@ -1,7 +1,8 @@
 """Build and parse standard GitHub URLs.
 """
 
-__all__ = ('RepoSlug', 'parse_repo_slug_from_url', 'make_raw_content_url')
+__all__ = ('RepoSlug', 'parse_repo_slug_from_url', 'make_raw_content_url',
+           'normalize_repo_root_url')
 
 import collections
 import re
@@ -84,3 +85,27 @@ def make_raw_content_url(repo_slug, git_ref, file_path):
         slug=slug_str,
         git_ref=git_ref,
         path=file_path)
+
+
+def normalize_repo_root_url(url):
+    """Normalize a GitHub URL into the root repository URL.
+
+    Parameters
+    ----------
+    url : `str`
+        A GitHub URL
+
+    Returns
+    -------
+    url : `str`
+        Normalized URL of a GitHub repository.
+
+    Examples
+    --------
+    >>> normalize_repo_root_url('https://github.com/lsst/LDM-151.git')
+    'https://github.com/lsst/LDM-151'
+    """
+    # Strip the .git extension, if present
+    if url.endswith('.git'):
+        url = url[:-4]
+    return url

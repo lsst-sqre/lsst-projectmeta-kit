@@ -3,7 +3,8 @@
 
 import pytest
 from lsstprojectmeta.github.urls import (
-    parse_repo_slug_from_url, RepoSlug, make_raw_content_url)
+    parse_repo_slug_from_url, RepoSlug, make_raw_content_url,
+    normalize_repo_root_url)
 
 
 @pytest.mark.parametrize(
@@ -29,3 +30,12 @@ def test_parse_repo_slug_from_url(url, expected):
     )
 def test_make_raw_content_url(inputs, expected):
     assert make_raw_content_url(*inputs) == expected
+
+
+@pytest.mark.parametrize(
+    'url,expected', [
+        ('https://github.com/lsst/LDM-151.git',
+         'https://github.com/lsst/LDM-151')
+    ])
+def test_normalize_repo_root_url(url, expected):
+    assert normalize_repo_root_url(url) == expected
