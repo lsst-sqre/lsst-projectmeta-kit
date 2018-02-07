@@ -2,8 +2,8 @@
 Change Log
 ##########
 
-Unreleased
-==========
+0.3.0 (2018-02-07)
+==================
 
 Changes
 -------
@@ -16,11 +16,20 @@ Changes
 New
 ---
 
-- New dependencies on ``'motor>=1.2.0, <1.3.0'``.
-- New ``lsstprojectmeta.github.graphql`` module that provides access to predefined GraphQL queries and executes them on the GitHub v4 (GraphQL) API.
-- Extract-transform-load pipeline for reStructuredText-based LSST technotes.
-  It uses the LSST the Docs API to find technote projects, then for each technote gets a ``metadata.yaml`` file and additional data from the GitHub API.
+- Added an extract-transform-load (ETL) pipeline for Sphinx-based LSST technotes and Lander-based landing page projects (that is, lsstdoc LaTeX documents).
+  The ETL pipeline is available as the ``projectmeta-ingest-docs`` command line program.
+  It uses the LSST the Docs (LTD) API to find technote projects, then for each technote gets a ``metadata.yaml`` file and additional data from the GitHub API.
+  If the LTD product can't be treated as a technote project, then we treat it as a Lander-based site where a ``metadata.jsonld`` file exists at the site's root.
   The ETL pipeline merges this data in a JSON-LD document that is loaded into the LSST Projectmeta MongoDB service.
+- New ``LsstLatexDoc.build_json()`` that can be used to export metadata about an lsstdoc-based document as JSON-LD.
+  This method is intended for the `Lander <https://github.com/lsst-sqre/lander>`_ project to upload metadata at build time.
+- New ``lsstprojectmeta.github.graphql`` module that provides access to predefined GraphQL queries and executes them on the GitHub v4 (GraphQL) API.
+- New ``lsstprojectmeta.ltd`` module that provides (asyncio) client functions for the LTD Keeper HTTP API.
+- New ``lsstprojectmeta.lsstdocument.handles`` module that provides APIs for parsing LSST document handles and mapping handles to series titles.
+- New ``lsstprojectmeta.jsonld`` module that provides custom JSON encoders and decoders.
+  The main role of these APIs is to roundtrip Python's native ``datetime.datetime`` objects.
+  This ensures we never have to work with string-based dates in Python code, and always serialize dates consistently as ISO 8601 in the UTC timezone.
+- New dependencies on ``'motor>=1.2.0, <1.3.0'``.
 
 0.2.2 (2017-11-20)
 ==================
