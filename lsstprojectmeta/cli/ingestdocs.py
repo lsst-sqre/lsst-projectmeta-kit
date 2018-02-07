@@ -10,6 +10,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 from ..ltd import get_ltd_product_urls, get_ltd_product
 from ..lsstdocument.handles import DOCUMENT_HANDLE_PATTERN
+from ..lsstdocument.lander import process_lander_page, NotLanderPageError
 from ..lsstdocument.sphinxtechnotes import (process_sphinx_technote,
                                             NotSphinxTechnoteError)
 
@@ -176,4 +177,17 @@ async def process_ltd_doc(session, github_api_token, ltd_product_url,
         logger.exception('Unexpected error trying to process %s', product_name)
         return
 
-    # TODO add other document formats here (latex docs)
+    # Try interpreting it as a Lander page with a /metadata.jsonld document
+    try:
+        return await process_lander_page(session,
+                                         github_api_token,
+                                         ltd_product_data,
+                                         mongo_collection=mongo_collection)
+    except NotLanderPageError:
+        # Catch error so we can try the next format
+        logger.debug('%s is not a Lander page with a metadata.jsonld file.',
+                     product_name)
+    except Exception:
+        # Something bad happened; log and move on
+        logger.exception('Unexpected error trying to process %s', product_name)
+        return
