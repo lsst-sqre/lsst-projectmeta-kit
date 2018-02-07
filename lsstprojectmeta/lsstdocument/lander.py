@@ -55,6 +55,8 @@ async def process_lander_page(session, github_api_token, ltd_product_data,
     jsonld_url = urljoin()
     try:
         async with session.get(jsonld_url) as response:
+            logger.debug('%s response status %r', jsonld_url, response.status)
+            response.raise_for_status()
             json_data = await response.text()
     except aiohttp.ClientResponseError as err:
         logger.debug('Tried to download %s, got status %d',
