@@ -52,9 +52,12 @@ async def process_lander_page(session, github_api_token, ltd_product_data,
     logger = logging.getLogger(__name__)
 
     # Try to download metadata.jsonld from the Landing page site.
-    jsonld_url = urljoin()
+    published_url = ltd_product_data['published_url']
+    jsonld_url = urljoin(published_url, '/metadata.jsonld')
     try:
         async with session.get(jsonld_url) as response:
+            logger.debug('%s response status %r', jsonld_url, response.status)
+            response.raise_for_status()
             json_data = await response.text()
     except aiohttp.ClientResponseError as err:
         logger.debug('Tried to download %s, got status %d',
@@ -65,6 +68,8 @@ async def process_lander_page(session, github_api_token, ltd_product_data,
 
     if mongo_collection is not None:
         await _upload_to_mongodb(mongo_collection, metadata)
+
+    return metadata
 
 
 async def _upload_to_mongodb(collection, jsonld):

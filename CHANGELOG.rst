@@ -2,6 +2,13 @@
 Change Log
 ##########
 
+0.3.1 (2018-02-10)
+==================
+
+- Fixes to the ``projectmeta-ingest-docs`` pipeline.
+- Catch the ``RuntimeError`` when calling ``LsstLatexDoc.build_jsonld`` if pypandoc fails to convert the LaTeX source to plain text.
+  We fall back to using the LaTeX source itself in those cases.
+
 0.3.0 (2018-02-07)
 ==================
 
