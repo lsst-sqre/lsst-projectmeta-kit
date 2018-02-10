@@ -730,14 +730,23 @@ class LsstLatexDoc(object):
             'reportNumber': self.handle,
             'name': self.plain_title,
             'description': self.plain_abstract,
-            'articleBody': self.plain_content,
-            'fileFormat': 'text/plain',  # MIME type of articleBody
             'author': [{'@type': 'Person', 'name': author_name}
                        for author_name in self.plain_authors],
             # This is a datetime.datetime; not a string. If writing to a file,
             # Need to convert this to a ISO 8601 string.
             'dateModified': self.revision_datetime
         }
+
+        try:
+            jsonld['articleBody'] = self.plain_content
+            jsonld['fileFormat'] = 'text/plain'  # MIME type of articleBody
+        except RuntimeError:
+            # raised by pypandoc when it can't convert the tex document
+            self._logger.exception('Could not convert latex body to plain '
+                                   'text for articleBody.')
+            self._logger.warning('Falling back to tex source for articleBody')
+            jsonld['articleBody'] = self._tex
+            jsonld['fileFormat'] = 'text/plain'  # no mimetype for LaTeX?
 
         if url is not None:
             jsonld['@id'] = url
