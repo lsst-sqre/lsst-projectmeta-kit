@@ -2,6 +2,11 @@
 Change Log
 ##########
 
+0.3.2 (2018-02-13)
+==================
+
+- Fix a regular expression case sensitivity in ``lsstprojectmeta.git.urls.parse_repo_slug_from_url``.
+
 0.3.1 (2018-02-10)
 ==================
 

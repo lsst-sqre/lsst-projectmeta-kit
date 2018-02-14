@@ -10,7 +10,12 @@ from lsstprojectmeta.github.urls import (
 @pytest.mark.parametrize(
     'url,expected',
     [('https://github.com/lsst-sqre/lsst-projectmeta-kit',
-     ('lsst-sqre/lsst-projectmeta-kit', 'lsst-sqre', 'lsst-projectmeta-kit'))])
+     ('lsst-sqre/lsst-projectmeta-kit', 'lsst-sqre', 'lsst-projectmeta-kit')),
+     ('https://github.com/lsst/LDM-151',
+     ('lsst/LDM-151', 'lsst', 'LDM-151')),
+     ('https://github.com/lsst-dm/dmtn-030',
+     ('lsst-dm/dmtn-030', 'lsst-dm', 'dmtn-030')),
+     ])
 def test_parse_repo_slug_from_url(url, expected):
     repo_slug = parse_repo_slug_from_url(url)
     assert repo_slug.full == expected[0]

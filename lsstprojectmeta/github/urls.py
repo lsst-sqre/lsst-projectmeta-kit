@@ -25,8 +25,8 @@ repo : `str`
 # Detects a GitHub repo slug from a GitHub URL
 GITHUB_SLUG_PATTERN = re.compile(
     r"https://github.com"
-    r"/(?P<org>[a-z0-9\-_~%!$&'()*+,;=:@]+)"
-    r"/(?P<name>[a-z0-9\-_~%!$&'()*+,;=:@]+)")
+    r"/(?P<org>[a-zA-Z0-9\-_~%!$&'()*+,;=:@]+)"
+    r"/(?P<name>[a-zA-Z0-9\-_~%!$&'()*+,;=:@]+)")
 
 
 def parse_repo_slug_from_url(github_url):
