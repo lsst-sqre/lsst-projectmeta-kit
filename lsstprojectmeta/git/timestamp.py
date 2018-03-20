@@ -143,6 +143,8 @@ def get_content_commit_date(extensions, acceptance_callback=None,
             try:
                 commit_datetime = read_git_commit_timestamp_for_file(
                     content_path, repo=repo)
+                logger.debug('Commit timestamp of %r is %s',
+                             content_path, commit_datetime)
             except IOError:
                 logger.warning(
                     'Count not get commit for %r, skipping',
@@ -153,6 +155,9 @@ def get_content_commit_date(extensions, acceptance_callback=None,
                 # Seed initial newest_datetime
                 # or set a newer newest_datetime
                 newest_datetime = commit_datetime
+                logger.debug('Newest commit timestamp is %s', newest_datetime)
+
+        logger.debug('Final commit timestamp is %s', newest_datetime)
 
     if newest_datetime is None:
         raise RuntimeError('No content files found in {}'.format(root_dir))
