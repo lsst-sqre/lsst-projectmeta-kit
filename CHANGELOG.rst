@@ -2,6 +2,12 @@
 Change Log
 ##########
 
+Unreleased
+==========
+
+- Switched to `setuptools_scm <https://pypi.org/project/setuptools_scm/>`_ for establishing the package's version string.
+  Previously lsst-projectmeta-kit used versioneer.
+
 0.3.2 (2018-02-13)
 ==================
 

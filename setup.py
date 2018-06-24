@@ -1,7 +1,6 @@
 from setuptools import setup, find_packages
 import os
 from io import open
-import versioneer
 
 
 packagename = 'lsst-projectmeta-kit'
@@ -26,7 +25,7 @@ long_description = read('README.rst')
 
 setup(
     name=packagename,
-    version=versioneer.get_version(),
+    use_scm_version=True,
     description=description,
     long_description=long_description,
     url=url,
@@ -59,8 +58,10 @@ setup(
             'pytest-cov==2.5.0',
             'pytest-flake8==0.9.1',
         ]},
-    cmdclass=versioneer.get_cmdclass(),
-    # package_data={},
+    setup_requires=[
+        'setuptools-scm==1.15.6',
+    ],
+    include_package_data=True,
     entry_points={
         'console_scripts': [
             ('lsstprojectmeta-deparagraph '
