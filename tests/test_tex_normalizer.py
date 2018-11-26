@@ -108,3 +108,12 @@ def test_replace_macros():
 def test_input_include_pattern(sample, expected):
     match = re.search(normalizer.input_include_pattern, sample)
     assert match.group('filename') == expected
+
+
+def test_non_inputs():
+    r"""Test for patterns like ``\inputData{XYZ}`` that have in the past been
+    detected as an ``\input`` command.
+    """
+    sample = r'\newcommand{\inputData}[1]{\texttt{#1}}'
+    match = re.search(normalizer.input_include_pattern, sample)
+    assert match is None

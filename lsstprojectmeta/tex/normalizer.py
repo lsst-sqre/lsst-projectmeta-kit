@@ -12,8 +12,7 @@ import re
 # Regular expression for finding input or include commands
 input_include_pattern = re.compile(
     r'\\(?P<command>input|include)'  # command name
-    r'[ ]*?'  # optional whitespace
-    r'{*?'  # optional opening bracket
+    r'(([ ]*\{)|([ ]+))'
     r'(?P<filename>[\w/\-\.]+)'  # included filename
     r'[\}%\s]'  # closing whitespace or bracket
 )
