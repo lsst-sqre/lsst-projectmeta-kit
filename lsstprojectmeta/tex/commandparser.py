@@ -204,7 +204,7 @@ class LatexCommand(object):
         """
         # First match the command name itself so that we find the argument
         # *after* the command
-        command_pattern = r'\\(' + name + ')(?:[\s{[%])'
+        command_pattern = r'\\(' + name + r')(?:[\s{[%])'
         command_match = re.search(command_pattern, source)
         if command_match is not None:
             # Trim `source` so we only look after the command

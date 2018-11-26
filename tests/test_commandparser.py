@@ -58,8 +58,8 @@ def test_no_short_title():
     """Test parsing the title command for a trivial source sample that
     doesn't include a short title.
     """
-    sample = ("Hello world\n\\title{Title}\nFin\n"
-              "\setDocRef{LDM-nnn}\n")
+    sample = ("Hello world\n" + r"\title{Title}" + "\nFin\n"
+              r"\setDocRef{LDM-nnn}" + "\n")
     elements = [
         {'name': 'short_title', 'required': False, 'bracket': '['},
         {'name': 'long_title', 'required': True, 'bracket': '{'}
@@ -80,8 +80,8 @@ def test_no_short_title_v2():
     doesn't include a short title, but where the [..]{..} does occur
     elsewhere.
     """
-    sample = ("Hello world\n\\title{Title}\nFin\n"
-              "\setDocRef[Trap]{LDM-nnn}\n")
+    sample = ("Hello world\n" + r"\title{Title}" + "\nFin\n"
+              r"\setDocRef[Trap]{LDM-nnn}" + "\n")
     elements = [
         {'name': 'short_title', 'required': False, 'bracket': '['},
         {'name': 'long_title', 'required': True, 'bracket': '{'}
@@ -99,8 +99,9 @@ def test_no_short_title_v2():
 
 @pytest.mark.parametrize(
     'command,sample',
-    [('title', '% hello\n\\title{Hello world}'),
-     ('title', '% hello\n\\title{Hello world}\n\\titlename{Imposter}')])
+    [('title', '% hello\n' + r'\title{Hello world}'),
+     ('title', '% hello\n' + r'\title{Hello world}' + '\n'
+         r'\titlename{Imposter}')])
 def test_command_regex(command, sample):
     """Test the regex make my LatexCommand._make_command_regex to ensure that
     it detects the command and not look-alike latex commands. Each sample
@@ -114,7 +115,11 @@ def test_command_regex(command, sample):
 def test_optional_bracket():
     """Test parsing a command where the sole token has no brackets around it.
     """
-    sample = "Hello.\n\n\input test.tex\n\nMore content."
+    sample = (
+        "Hello.\n\n"
+        r"\input test.tex"
+        "\n\nMore content."
+    )
 
     command = LatexCommand(
         'input',

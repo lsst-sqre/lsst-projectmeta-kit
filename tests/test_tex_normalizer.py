@@ -10,7 +10,7 @@ import lsstprojectmeta.tex.normalizer as normalizer
 
 
 def test_remove_comments_abstract():
-    sample = ("\setDocAbstract{%\n"
+    sample = (r"\setDocAbstract{%" + '\n'
               " The LSST Data Management System (DMS) is a set of services\n"
               " employing a variety of software components running on\n"
               " computational and networking infrastructure that combine to\n"
@@ -21,7 +21,7 @@ def test_remove_comments_abstract():
               " of the LSST system, and the outside world.\n"
               "}")
     expected = (
-        "\setDocAbstract{\n"
+        r"\setDocAbstract{" + '\n'
         " The LSST Data Management System (DMS) is a set of services\n"
         " employing a variety of software components running on\n"
         " computational and networking infrastructure that combine to\n"
@@ -36,8 +36,8 @@ def test_remove_comments_abstract():
 
 def test_escaped_remove_comments():
     """Test remove_comments where a "%" is escaped."""
-    sample = "The uncertainty is 5\%.  % a comment"
-    expected = "The uncertainty is 5\%.  "
+    sample = r"The uncertainty is 5\%.  % a comment"
+    expected = r"The uncertainty is 5\%.  "
     assert normalizer.remove_comments(sample) == expected
 
 
@@ -93,18 +93,27 @@ def test_replace_macros():
 
 @pytest.mark.parametrize(
     'sample,expected',
-    [('\input{file.tex}', 'file.tex'),
-     ('\input{dirname/file.tex}', 'dirname/file.tex'),
-     ('\input {file}%', 'file'),
-     ('\input file%', 'file'),
-     ('\input file\n', 'file'),
-     ('\input file \n', 'file'),
-     ('\include{file.tex}', 'file.tex'),
-     ('\include{dirname/file.tex}', 'dirname/file.tex'),
-     ('\include {file}%', 'file'),
-     ('\include file%', 'file'),
-     ('\include file\n', 'file'),
-     ('\include file \n', 'file')])
+    [(r'\input{file.tex}', 'file.tex'),
+     (r'\input{dirname/file.tex}', 'dirname/file.tex'),
+     (r'\input {file}%', 'file'),
+     (r'\input file%', 'file'),
+     (r'\input file' + '\n', 'file'),
+     (r'\input file ' + '\n', 'file'),
+     (r'\include{file.tex}', 'file.tex'),
+     (r'\include{dirname/file.tex}', 'dirname/file.tex'),
+     (r'\include {file}%', 'file'),
+     (r'\include file%', 'file'),
+     (r'\include file' + '\n', 'file'),
+     (r'\include file' + ' \n', 'file')])
 def test_input_include_pattern(sample, expected):
     match = re.search(normalizer.input_include_pattern, sample)
     assert match.group('filename') == expected
+
+
+def test_non_inputs():
+    r"""Test for patterns like ``\inputData{XYZ}`` that have in the past been
+    detected as an ``\input`` command.
+    """
+    sample = r'\newcommand{\inputData}[1]{\texttt{#1}}'
+    match = re.search(normalizer.input_include_pattern, sample)
+    assert match is None

@@ -18,17 +18,17 @@ def test_no_short_title():
 def test_title_variations():
     """Test variations on the title command's formatting."""
     # Test with whitespace in title command
-    input_txt = "\\title    [Test Plan]  { \product ~Test Plan}"
+    input_txt = r"\title    [Test Plan]  { \product ~Test Plan}"
     lsstdoc = LsstLatexDoc(input_txt)
-    assert lsstdoc.title == "\product ~Test Plan"
+    assert lsstdoc.title == r"\product ~Test Plan"
     assert lsstdoc.short_title == "Test Plan"
 
 
 def test_author_variations():
     """Test variations on the author command's formatting."""
-    input_txt = ("\\author   {William O'Mullane, Mario Juric, "
-                 "Frossie Economou}"
-                 "                  % the author(s)")
+    input_txt = (r"\author   {William O'Mullane, Mario Juric, "
+                 r"Frossie Economou}"
+                 r"                  % the author(s)")
     lsstdoc = LsstLatexDoc(input_txt)
     assert lsstdoc.authors == ["William O'Mullane",
                                "Mario Juric",
@@ -37,21 +37,21 @@ def test_author_variations():
 
 def test_handle_variations():
     """Test variations on the handle command's formatting."""
-    input_txt = "\setDocRef      {LDM-503} % the reference code "
+    input_txt = r"\setDocRef      {LDM-503} % the reference code "
     lsstdoc = LsstLatexDoc(input_txt)
     assert lsstdoc.handle == "LDM-503"
 
 
 def test_abstract_variations():
     """Test variations on the abstract command's formatting."""
-    input_txt = ("\setDocAbstract {\n"
-                 "This is the  Test Plan for \product. In it we define terms "
-                 "associated with testing and further test specifications for "
-                 "specific items.}")
+    input_txt = (r"\setDocAbstract {" + "\n"
+                 r"This is the  Test Plan for \product. In it we define terms "
+                 r"associated with testing and further test specifications "
+                 r"for specific items.}")
     expected_abstract = (
-        "This is the  Test Plan for \product. In it we define terms "
-        "associated with testing and further test specifications for "
-        "specific items."
+        r"This is the  Test Plan for \product. In it we define terms "
+        r"associated with testing and further test specifications for "
+        r"specific items."
     )
     lsstdoc = LsstLatexDoc(input_txt)
     assert lsstdoc.abstract == expected_abstract
@@ -68,7 +68,7 @@ def test_is_draft(sample, expected):
 
 
 def test_html_title():
-    sample = "\\title{``Complex'' title \\textit{like} $1+2$}"
+    sample = r"\title{``Complex'' title \textit{like} $1+2$}"
     expected = ('“Complex” title <em>like</em> '
                 '<span class="math inline">1\u2005+\u20052</span>\n')
     lsstdoc = LsstLatexDoc(sample)

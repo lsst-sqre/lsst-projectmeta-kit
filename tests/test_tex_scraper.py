@@ -13,10 +13,10 @@ def test_get_def_macros():
 
 
 def test_get_def_macros_LDM_503():
-    sample = ('\documentclass[DM,STP,toc]{lsstdoc}\n'
+    sample = (r'\documentclass[DM,STP,toc]{lsstdoc}' + '\n'
               '%set the WP number or product here for the requirements\n'
-              '\def\product{Data Management}\n'
-              '\def\cycle{S17}\n')
+              r'\def\product{Data Management}' + '\n'
+              r'\def\cycle{S17}' + '\n')
     macros = scraper.get_def_macros(sample)
 
     assert macros[r'\product'] == 'Data Management'
