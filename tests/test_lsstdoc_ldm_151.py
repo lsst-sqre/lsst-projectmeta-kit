@@ -24,11 +24,11 @@ AUTHORS = [
     "T. Axelrod", "A.C. Becker", "J. Becla", "E. Bellm",
     "J.F. Bosch", "H. Chiang", "D.R. Ciardi", "A.J. Connolly",
     "G.P. Dubois-Felsmann", "F. Economou", "M. Fisher-Levine", "M. Graham",
-    "\\v{Z}. Ivezi\\'c", "M. Juri\\'c",
+    r"\v{Z}. Ivezi\'c", r"M. Juri\'c",
     "T. Jenness", "R.L. Jones", "J. Kantor", "S. Krughoff", "K-T. Lim",
     "R.H. Lupton", "F. Mueller", "D. Petravick", "P.A. Price",
     "D.J. Reiss", "D. Shaw", "C. Slater", "M. Wood-Vasey", "X. Wu",
-    "P. Yoachim", "\emph{for the LSST Data Management}"
+    "P. Yoachim", r"\emph{for the LSST Data Management}"
 ]
 
 HTML_AUTHORS = [
@@ -58,18 +58,18 @@ PLAIN_AUTHORS = [
 ]
 
 ABSTRACT = (
-    "The LSST Science Requirements Document (the LSST \SRD) specifies a set "
-    "of data product guidelines, designed to support science goals "
-    "envisioned to be enabled by the LSST observing program.\n"
-    "Following these guidlines, the details of these data products have "
-    "been described in the LSST Data Products Definition Document (\DPDD), "
-    "and captured in a formal flow-down from the \SRD via the LSST System "
-    "Requirements (\LSR), Observatory System Specifications (\OSS), to the "
-    "Data Management System Requirements (\DMSR).\n"
-    "The LSST Data Management subsystem's responsibilities include the "
-    "design, implementation, deployment and execution of software pipelines "
-    "necessary to generate these data products. This document describes the "
-    "design of the scientific aspects of those pipelines."
+    r"The LSST Science Requirements Document (the LSST \SRD) specifies a set "
+    r"of data product guidelines, designed to support science goals "
+    r"envisioned to be enabled by the LSST observing program." + "\n"
+    r"Following these guidlines, the details of these data products have "
+    r"been described in the LSST Data Products Definition Document (\DPDD), "
+    r"and captured in a formal flow-down from the \SRD via the LSST System "
+    r"Requirements (\LSR), Observatory System Specifications (\OSS), to the "
+    r"Data Management System Requirements (\DMSR)." + "\n"
+    r"The LSST Data Management subsystem's responsibilities include the "
+    r"design, implementation, deployment and execution of software pipelines "
+    r"necessary to generate these data products. This document describes the "
+    r"design of the scientific aspects of those pipelines."
 )
 
 HTML_ABSTRACT = (
