@@ -2,6 +2,15 @@
 Change Log
 ##########
 
+0.3.3 (2018-11-26)
+==================
+
+- Fix an issue with the ``input_include_pattern`` regular expression that detects ``\input`` and ``\include`` commands.
+  It was detecting expressions like ``\newcommand{\inputData}[1]{\texttt{#1}}`` because both the whitespace and bracket delimiters to the argument were optional.
+  Now at least whitespace or an opening bracket are required.
+
+- Ensure that LaTeX-formatted strings in test code aren't being interpreted as improper escape sequences (pycodestyle's W605 error code).
+
 0.3.2 (2018-02-13)
 ==================
 
