@@ -15,6 +15,8 @@ SERIES = {
     'DMTN': 'Data Management Technical Note',
     'SMTN': 'Simulations Technical Note',
     'PSTN': 'Project Science Team Technical Note',
+    'SITCOMTN': 'Systems Integration, Testing, and Commissioning Technical '
+                'Note',
 }
 """Mapping between LSST document series (handle prefixes) and the title of the
 series.
