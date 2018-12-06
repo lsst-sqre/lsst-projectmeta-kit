@@ -2,6 +2,14 @@
 Change Log
 ##########
 
+Unreleased
+==========
+
+- Switched to `setuptools_scm <https://pypi.org/project/setuptools_scm/>`_ for establishing the package's version string.
+  Previously lsst-projectmeta-kit used versioneer.
+
+- Add PSTN document handle.
+
 0.3.3 (2018-11-26)
 ==================
 
