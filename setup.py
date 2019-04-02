@@ -54,9 +54,9 @@ setup(
     extras_require={
         'dev': [
             # Development/testing dependencies
-            'pytest==3.2.5',
-            'pytest-cov==2.5.0',
-            'pytest-flake8==0.9.1',
+            'pytest==4.4.0',
+            'pytest-cov==2.6.1',
+            'pytest-flake8==1.0.4',
         ]},
     setup_requires=[
         'setuptools-scm==1.15.6',

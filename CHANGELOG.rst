@@ -6,6 +6,7 @@ Change Log
 ==================
 
 - Fixed a bug where the ``lsstdoc`` author parsing would split names like "Amanda."
+- Updated ``pytest`` to 4.4.0, ``pytest-flake8`` to 1.0.4, and ``pytest-cov`` to 2.6.1.
 
 0.3.4 (2018-12-06)
 ==================
