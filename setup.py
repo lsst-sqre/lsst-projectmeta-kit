@@ -49,14 +49,16 @@ setup(
         'pybtex>=0.21',
         'GitPython>=2.1.7',
         'pytz',
-        'motor>=1.2.0, <1.3.0'
+        'motor>=1.2.0, <1.3.0',
+        # https://github.com/Julian/jsonschema/issues/449#issuecomment-411406525
+        'attrs>=17.4.0 '
     ],
     extras_require={
         'dev': [
             # Development/testing dependencies
-            'pytest==3.2.5',
-            'pytest-cov==2.5.0',
-            'pytest-flake8==0.9.1',
+            'pytest==4.4.0',
+            'pytest-cov==2.6.1',
+            'pytest-flake8==1.0.4',
         ]},
     setup_requires=[
         'setuptools-scm==1.15.6',
