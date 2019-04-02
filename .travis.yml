@@ -1,5 +1,6 @@
 sudo: false
 language: python
+dist: xenial
 python:
   # General Python matrix
   - "3.5"
