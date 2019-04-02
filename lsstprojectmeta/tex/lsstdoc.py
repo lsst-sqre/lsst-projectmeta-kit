@@ -541,13 +541,10 @@ class LsstLatexDoc(object):
         authors = []
         for part in content.split(','):
             part = part.strip()
-            if 'and' in part:
-                for split_part in part.split('and'):
-                    split_part = split_part.strip()
-                    if len(split_part) > 0:
-                        authors.append(split_part)
-            else:
-                authors.append(part)
+            for split_part in part.split('and '):
+                split_part = split_part.strip()
+                if len(split_part) > 0:
+                    authors.append(split_part)
         self._authors = authors
 
     def _parse_abstract(self):

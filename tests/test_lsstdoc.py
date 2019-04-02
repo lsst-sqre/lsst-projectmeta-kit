@@ -35,6 +35,30 @@ def test_author_variations():
                                "Frossie Economou"]
 
 
+def test_author_list_amanda():
+    """Test author list parsing where one author's name is Amanda.
+    """
+    input_txt = (
+        r"\author   {William O'Mullane, John Swinbank, Leanne Guy, "
+        r"Amanda Bauer}"
+    )
+    expected = [
+        "William O'Mullane",
+        "John Swinbank",
+        "Leanne Guy",
+        "Amanda Bauer"
+    ]
+    lsstdoc = LsstLatexDoc(input_txt)
+    assert lsstdoc.authors == expected
+
+
+def test_author_list_and():
+    input_txt = r"\author{A.~Author, B.~Author, and C.~Author}"
+    expected = ['A. Author', 'B. Author', 'C. Author']
+    lsstdoc = LsstLatexDoc(input_txt)
+    assert lsstdoc.authors == expected
+
+
 def test_handle_variations():
     """Test variations on the handle command's formatting."""
     input_txt = r"\setDocRef      {LDM-503} % the reference code "

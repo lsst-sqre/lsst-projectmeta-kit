@@ -2,6 +2,11 @@
 Change Log
 ##########
 
+0.3.5 (2019-04-02)
+==================
+
+- Fixed a bug where the ``lsstdoc`` author parsing would split names like "Amanda."
+
 0.3.4 (2018-12-06)
 ==================
 
