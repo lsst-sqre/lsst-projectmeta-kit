@@ -6,7 +6,7 @@ lsst-projectmeta-kit
    :target: https://pypi.python.org/pypi/lsst-projectmeta-kit
    :alt: Python Package Index
 .. image:: https://img.shields.io/travis/lsst-sqre/lsst-projectmeta-kit.svg
-   :target: https://travis-ci.org/lsst-sqre/lsst-projectmeta-kit
+   :target: https://travis-ci.com/lsst-sqre/lsst-projectmeta-kit
    :alt: Travis CI build status
 
 **lsst-projectmeta-kit is a Python toolkit for extracting and transforming metadata about LSST's code and documentation projects, and loading it into the LSST projectmeta database.**
