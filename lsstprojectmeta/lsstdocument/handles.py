@@ -17,6 +17,8 @@ SERIES = {
     'PSTN': 'Project Science Team Technical Note',
     'SITCOMTN': 'Systems Integration, Testing, and Commissioning Technical '
                 'Note',
+    'OPSTN': 'LSST Operations Technical Note',
+    'TSTN': 'LSST Telescope & Site Technical Note',
 }
 """Mapping between LSST document series (handle prefixes) and the title of the
 series.
